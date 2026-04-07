@@ -98,8 +98,8 @@ export default function Home() {
                 Sans Simulator
               </Link>
               <Link
-                href="/3d-engine"
-                className="project-title absolute top-28 left-30 md:top-32 md:left-78 text-lg md:text-2xl font-[Cinzel] text-black cursor-pointer tracking-[0.18em]"
+                href="/taisei-project-mp"
+                className="project-title absolute top-28 left-22 md:top-32 md:left-67 text-base md:text-[1.6rem] font-[Cinzel] text-black cursor-pointer tracking-[0.14em]"
                 style={{
                   textShadow: '0 0 10px rgba(0,0,0,0.9), 1px 1px 2px rgba(0,0,0,0.9)',
                   padding: '0.08rem 0.22rem',
@@ -107,7 +107,7 @@ export default function Home() {
                   backgroundColor: 'transparent',
                 }}
               >
-                3D Engine
+                Taisei Project MP
               </Link>
               <style jsx>{`
                 .project-title:hover {

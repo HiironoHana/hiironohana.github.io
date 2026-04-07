@@ -1,0 +1,736 @@
+<!doctype html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover, user-scalable=no"
+    >
+    <meta name="theme-color" content="#050207">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="preload" href="taisei.wasm" as="fetch" crossorigin>
+    <title>Taisei Project MP</title>
+    <script id="taisei-script" src="taisei.js" async></script>
+    <style>
+        html, body {
+            background: #000;
+            color: #eee;
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+            padding: 0;
+            touch-action: none;
+        }
+
+        body {
+            background-color: #111;
+            background-image: url("background.webp");
+            background-position: 50% 50%;
+            background-repeat: no-repeat;
+            background-size: cover;
+            font-family: Arial, Helvetica, sans-serif;
+            inset: 0;
+            position: fixed;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .emscripten {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            padding-right: 0;
+        }
+
+        canvas.emscripten {
+            background-color: transparent;
+            border: 0;
+            display: block;
+            height: 100vh;
+            height: 100dvh;
+            inset: 0;
+            position: fixed;
+            width: 100vw;
+        }
+
+        #hudBar {
+            align-items: center;
+            display: flex;
+            gap: 12px;
+            justify-content: space-between;
+            left: 0;
+            padding:
+                calc(env(safe-area-inset-top, 0px) + 10px)
+                calc(env(safe-area-inset-right, 0px) + 12px)
+                10px
+                calc(env(safe-area-inset-left, 0px) + 12px);
+            pointer-events: none;
+            position: fixed;
+            right: 0;
+            top: 0;
+            z-index: 20;
+        }
+
+        #titleChip,
+        #statusChip {
+            backdrop-filter: blur(10px);
+            background: rgba(0, 0, 0, 0.45);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 999px;
+            color: #fff;
+            font-size: 11px;
+            letter-spacing: 0.22em;
+            padding: 10px 14px;
+            text-transform: uppercase;
+        }
+
+        #statusChip {
+            color: #b7f5ff;
+            margin-left: auto;
+            max-width: min(56vw, 460px);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        #infoContainer {
+            background: rgba(0, 0, 0, 0.72);
+            border-radius: 24px;
+            left: 50%;
+            max-width: min(92vw, 760px);
+            padding: 18px 18px 16px;
+            position: fixed;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            width: calc(100vw - 32px);
+            z-index: 12;
+        }
+
+        #infoContainer.top {
+            background: rgba(0, 0, 0, 0.28);
+            left: auto;
+            max-width: none;
+            right: calc(env(safe-area-inset-right, 0px) + 12px);
+            top: calc(env(safe-area-inset-top, 0px) + 56px);
+            transform: none;
+            width: min(440px, calc(100vw - 24px));
+        }
+
+        #infoContainer.hidden {
+            opacity: 0;
+            pointer-events: none;
+            transform: translate(-50%, -46%);
+        }
+
+        #infoContainer.top.hidden {
+            transform: translateY(-6px);
+        }
+
+        #loadingPanel {
+            align-items: center;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            text-align: center;
+        }
+
+        #hintText {
+            color: rgba(255, 255, 255, 0.82);
+            font-size: 12px;
+            letter-spacing: 0.12em;
+            line-height: 1.7;
+            max-width: 54ch;
+            text-transform: uppercase;
+        }
+
+        #status {
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            line-height: 1.5;
+            text-transform: uppercase;
+        }
+
+        #spinner {
+            height: 72px;
+            overflow: visible;
+            padding-bottom: 6px;
+            width: 72px;
+        }
+
+        img.spinner {
+            animation: rotation 0.6s linear infinite;
+            border: 0;
+            height: 72px;
+            margin: 0 auto;
+            width: 72px;
+        }
+
+        #progressWrap {
+            width: min(100%, 420px);
+        }
+
+        #progress {
+            margin: 0;
+            width: 100%;
+        }
+
+        #logToggleContainer {
+            display: none;
+            margin-top: 4px;
+            opacity: 0.75;
+        }
+
+        #logContainer {
+            margin: 12px auto 0;
+            width: 100%;
+        }
+
+        textarea.emscripten {
+            background: rgba(0, 0, 0, 0.35);
+            border: 0;
+            border-radius: 14px;
+            color: #eee;
+            font-family: Consolas, "Courier New", monospace;
+            margin: 0;
+            min-height: 160px;
+            resize: none;
+            text-shadow: 2px 2px black;
+            width: 100%;
+        }
+
+        progress {
+            -moz-appearance: none;
+            -webkit-appearance: none;
+            background-color: #eee;
+            border: 0;
+            border-radius: 999px;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.25);
+            height: 12px;
+        }
+
+        progress::-webkit-progress-bar {
+            background-color: #eee;
+            border-radius: 999px;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.25);
+        }
+
+        progress::-webkit-progress-value {
+            background-image:
+                -webkit-linear-gradient(top, rgba(0, 0, 0, 0.25), rgba(255, 255, 255, 0.25)),
+                -webkit-linear-gradient(left, #5c7da8, #6db0ed);
+            border-radius: 999px;
+        }
+
+        progress::-moz-progress-bar {
+            background-image:
+                -moz-linear-gradient(top, rgba(0, 0, 0, 0.25), rgba(255, 255, 255, 0.25)),
+                -moz-linear-gradient(left, #5c7da8, #6db0ed);
+            border-radius: 999px;
+        }
+
+        #mobileControls {
+            display: none;
+            inset: 0;
+            pointer-events: none;
+            position: fixed;
+            z-index: 25;
+        }
+
+        .mobile-zone {
+            background: rgba(0, 0, 0, 0.28);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 999px;
+            pointer-events: auto;
+            touch-action: none;
+        }
+
+        #stickZone {
+            bottom: calc(env(safe-area-inset-bottom, 0px) + 18px);
+            height: 148px;
+            left: calc(env(safe-area-inset-left, 0px) + 18px);
+            position: absolute;
+            width: 148px;
+        }
+
+        #stickBase,
+        #stickKnob {
+            border-radius: 50%;
+            left: 50%;
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        #stickBase {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            height: 82px;
+            width: 82px;
+        }
+
+        #stickKnob {
+            background: rgba(122, 217, 255, 0.78);
+            box-shadow: 0 0 18px rgba(122, 217, 255, 0.25);
+            height: 52px;
+            transition: transform 0.05s linear;
+            width: 52px;
+        }
+
+        #actionCluster {
+            bottom: calc(env(safe-area-inset-bottom, 0px) + 18px);
+            display: grid;
+            gap: 12px;
+            grid-template-columns: repeat(2, minmax(0, 84px));
+            position: absolute;
+            right: calc(env(safe-area-inset-right, 0px) + 18px);
+        }
+
+        .action-btn {
+            align-items: center;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 24px;
+            color: #fff;
+            display: flex;
+            font-size: 12px;
+            font-weight: 700;
+            height: 78px;
+            justify-content: center;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            width: 84px;
+        }
+
+        .action-btn.active {
+            background: rgba(122, 217, 255, 0.28);
+            border-color: rgba(122, 217, 255, 0.7);
+            box-shadow: 0 0 20px rgba(122, 217, 255, 0.24);
+        }
+
+        #fullscreenBtn {
+            align-items: center;
+            background: rgba(0, 0, 0, 0.42);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 999px;
+            color: #fff;
+            display: flex;
+            font-size: 11px;
+            font-weight: 700;
+            justify-content: center;
+            letter-spacing: 0.18em;
+            min-width: 132px;
+            padding: 12px 16px;
+            pointer-events: auto;
+            position: absolute;
+            right: calc(env(safe-area-inset-right, 0px) + 18px);
+            text-transform: uppercase;
+            top: calc(env(safe-area-inset-top, 0px) + 62px);
+        }
+
+        #rotateHint {
+            background: rgba(0, 0, 0, 0.66);
+            border-radius: 18px;
+            bottom: calc(env(safe-area-inset-bottom, 0px) + 188px);
+            color: #fff;
+            display: none;
+            font-size: 11px;
+            left: 50%;
+            letter-spacing: 0.16em;
+            padding: 10px 14px;
+            position: absolute;
+            text-transform: uppercase;
+            transform: translateX(-50%);
+        }
+
+        @media (hover: none) and (pointer: coarse) {
+            #mobileControls {
+                display: block;
+            }
+        }
+
+        @media (hover: none) and (pointer: coarse) and (orientation: portrait) {
+            #rotateHint {
+                display: block;
+            }
+        }
+
+        @media (max-width: 720px) {
+            #titleChip,
+            #statusChip {
+                font-size: 10px;
+                letter-spacing: 0.16em;
+                padding: 9px 11px;
+            }
+
+            #infoContainer {
+                border-radius: 18px;
+                padding: 16px 14px 14px;
+                width: calc(100vw - 20px);
+            }
+
+            #status {
+                font-size: 12px;
+            }
+
+            #hintText {
+                font-size: 11px;
+                line-height: 1.6;
+            }
+        }
+
+        @keyframes rotation {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1" style="z-index: -10;"></canvas>
+
+    <div id="hudBar">
+        <div id="titleChip">Taisei Project MP</div>
+        <div id="statusChip">Booting local Taisei runtime...</div>
+    </div>
+
+    <div id="infoContainer">
+        <div id="loadingPanel">
+            <div class="spinner" id="spinner"><img src="scythe.webp" class="spinner" alt=""></div>
+            <div id="status">Girls are now downloading, please wait warmly...</div>
+            <div id="progressWrap">
+                <progress value="0" max="100" id="progress"></progress>
+            </div>
+            <div id="hintText">
+                This local page runs entirely from your own website files. Desktop uses keyboard/gamepad.
+                Mobile uses the on-screen stick plus Shot, Bomb, Focus, and Pause buttons.
+            </div>
+            <div id="logToggleContainer" hidden>
+                <input type="checkbox" name="logToggle" id="logToggle" onclick="toggleLog()">
+                <label for="logToggle"> Show log</label>
+            </div>
+            <div id="logContainer" hidden>
+                <textarea class="emscripten" id="output" rows="12" readonly></textarea>
+            </div>
+        </div>
+    </div>
+
+    <div id="mobileControls" aria-hidden="true">
+        <div id="stickZone" class="mobile-zone">
+            <div id="stickBase"></div>
+            <div id="stickKnob"></div>
+        </div>
+
+        <button id="fullscreenBtn" type="button">Fullscreen</button>
+
+        <div id="actionCluster">
+            <button class="action-btn" data-key="z" type="button">Shot</button>
+            <button class="action-btn" data-key="x" type="button">Bomb</button>
+            <button class="action-btn" data-key="Shift" type="button">Focus</button>
+            <button class="action-btn" data-key="Escape" type="button">Pause</button>
+        </div>
+
+        <div id="rotateHint">Rotate sideways for best play</div>
+    </div>
+
+    <script type="application/javascript">
+        function E(id) { return document.getElementById(id); }
+
+        var statusElement = E("status");
+        var statusChipElement = E("statusChip");
+        var progressElement = E("progress");
+        var spinnerElement = E("spinner");
+        var canvasElement = E("canvas");
+        var infoContainerElement = E("infoContainer");
+        var logToggleElement = E("logToggle");
+        var logToggleContainerElement = E("logToggleContainer");
+        var logContainerElement = E("logContainer");
+        var logOutputElement = E("output");
+        var taiseiScriptElement = E("taisei-script");
+        var mobileControlsElement = E("mobileControls");
+        var fullscreenButtonElement = E("fullscreenBtn");
+        var stickZoneElement = E("stickZone");
+        var stickKnobElement = E("stickKnob");
+        var actionButtons = Array.prototype.slice.call(document.querySelectorAll(".action-btn"));
+        var dlMessage = statusElement.innerText;
+        var activeButtons = Object.create(null);
+        var stickPointerId = null;
+        var activeDirectionKeys = new Set();
+        var firstFrameSeen = false;
+        var startupWatchdogId = null;
+
+        logToggleElement.checked = false;
+
+        function dispatchInputKey(key, isDown) {
+            var eventName = isDown ? "keydown" : "keyup";
+            var event = new KeyboardEvent(eventName, {
+                bubbles: true,
+                cancelable: true,
+                composed: true,
+                key: key
+            });
+            window.dispatchEvent(event);
+            document.dispatchEvent(event);
+            canvasElement.dispatchEvent(event);
+        }
+
+        function setKeyPressed(key, pressed, buttonElement) {
+            if (pressed) {
+                if (activeButtons[key]) {
+                    return;
+                }
+                activeButtons[key] = true;
+                dispatchInputKey(key, true);
+                if (buttonElement) {
+                    buttonElement.classList.add("active");
+                }
+                return;
+            }
+
+            if (!activeButtons[key]) {
+                return;
+            }
+            delete activeButtons[key];
+            dispatchInputKey(key, false);
+            if (buttonElement) {
+                buttonElement.classList.remove("active");
+            }
+        }
+
+        function syncDirectionalKeys(nextKeys) {
+            ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].forEach(function(key) {
+                var shouldPress = nextKeys.indexOf(key) !== -1;
+                var isPressed = activeDirectionKeys.has(key);
+                if (shouldPress && !isPressed) {
+                    activeDirectionKeys.add(key);
+                    setKeyPressed(key, true);
+                } else if (!shouldPress && isPressed) {
+                    activeDirectionKeys.delete(key);
+                    setKeyPressed(key, false);
+                }
+            });
+        }
+
+        function resetStick() {
+            syncDirectionalKeys([]);
+            stickKnobElement.style.transform = "translate(-50%, -50%)";
+        }
+
+        function updateStick(clientX, clientY) {
+            var rect = stickZoneElement.getBoundingClientRect();
+            var centerX = rect.left + rect.width / 2;
+            var centerY = rect.top + rect.height / 2;
+            var dx = clientX - centerX;
+            var dy = clientY - centerY;
+            var maxRadius = rect.width * 0.32;
+            var distance = Math.min(maxRadius, Math.hypot(dx, dy));
+            var angle = Math.atan2(dy, dx);
+            var limitedX = Math.cos(angle) * distance;
+            var limitedY = Math.sin(angle) * distance;
+            var nx = maxRadius ? limitedX / maxRadius : 0;
+            var ny = maxRadius ? limitedY / maxRadius : 0;
+            var threshold = 0.28;
+            var nextKeys = [];
+
+            if (nx <= -threshold) nextKeys.push("ArrowLeft");
+            if (nx >= threshold) nextKeys.push("ArrowRight");
+            if (ny <= -threshold) nextKeys.push("ArrowUp");
+            if (ny >= threshold) nextKeys.push("ArrowDown");
+
+            syncDirectionalKeys(nextKeys);
+            stickKnobElement.style.transform = "translate(calc(-50% + " + limitedX + "px), calc(-50% + " + limitedY + "px))";
+        }
+
+        function attachActionButton(button) {
+            var key = button.getAttribute("data-key");
+            var press = function(event) {
+                event.preventDefault();
+                setKeyPressed(key, true, button);
+            };
+            var release = function(event) {
+                event.preventDefault();
+                setKeyPressed(key, false, button);
+            };
+
+            button.addEventListener("pointerdown", press);
+            button.addEventListener("pointerup", release);
+            button.addEventListener("pointercancel", release);
+            button.addEventListener("pointerleave", function(event) {
+                if (event.buttons === 0) {
+                    release(event);
+                }
+            });
+        }
+
+        actionButtons.forEach(attachActionButton);
+
+        stickZoneElement.addEventListener("pointerdown", function(event) {
+            event.preventDefault();
+            stickPointerId = event.pointerId;
+            stickZoneElement.setPointerCapture(event.pointerId);
+            updateStick(event.clientX, event.clientY);
+        });
+
+        stickZoneElement.addEventListener("pointermove", function(event) {
+            if (stickPointerId !== event.pointerId) {
+                return;
+            }
+            event.preventDefault();
+            updateStick(event.clientX, event.clientY);
+        });
+
+        function releaseStick(event) {
+            if (stickPointerId !== event.pointerId) {
+                return;
+            }
+            if (stickZoneElement.hasPointerCapture(event.pointerId)) {
+                stickZoneElement.releasePointerCapture(event.pointerId);
+            }
+            stickPointerId = null;
+            resetStick();
+        }
+
+        stickZoneElement.addEventListener("pointerup", releaseStick);
+        stickZoneElement.addEventListener("pointercancel", releaseStick);
+
+        fullscreenButtonElement.addEventListener("click", async function() {
+            try {
+                if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+                    await document.documentElement.requestFullscreen();
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        });
+
+        var setStatus = (function() {
+            var ss = {};
+            return function(text, force) {
+                if (!text && !force) return;
+                if (!ss.last) ss.last = { time: Date.now(), text: "" };
+                if (text === ss.last.text) return;
+
+                var m = text.match(/([^(]+)\((\d+(\.\d+)?)\/(\d+)\)/);
+                var now = Date.now();
+                if (m && now - ss.last.time < 30) return;
+                ss.last.time = now;
+                ss.last.text = text;
+
+                if (m) {
+                    text = m[1];
+                    progressElement.value = parseInt(m[2], 10) * 100;
+                    progressElement.max = parseInt(m[4], 10) * 100;
+                    progressElement.hidden = false;
+                    spinnerElement.hidden = !canvasElement.hidden;
+                } else {
+                    progressElement.value = null;
+                    progressElement.max = null;
+                    progressElement.hidden = true;
+                    if (!text) spinnerElement.hidden = true;
+                }
+
+                var formatted = text.replace(/^Downloading(?: data)?\.\.\./, dlMessage).replace("...", "...");
+                statusElement.innerText = formatted;
+                statusChipElement.innerText = formatted || "Taisei Project MP";
+                console.log("[STATUS] " + statusElement.innerText);
+            };
+        })();
+
+        window.onerror = function(error) {
+            setStatus("Error: " + error, true);
+        };
+
+        window.toggleLog = function toggleLog() {
+            logContainerElement.hidden = !logToggleElement.checked;
+            logOutputElement.scrollTop = logOutputElement.scrollHeight;
+        };
+
+        var glContext = canvasElement.getContext("webgl2", {
+            alpha: false,
+            antialias: false,
+            depth: false,
+            powerPreference: "high-performance",
+            premultipliedAlpha: true,
+            preserveDrawingBuffer: false,
+            stencil: false
+        });
+
+        if (!glContext) {
+            throw "Could not create a WebGL 2 context";
+        }
+
+        canvasElement.addEventListener("webglcontextlost", function(e) {
+            alert("WebGL context lost. You will need to reload the page.");
+            e.preventDefault();
+        }, false);
+
+        document.addEventListener("keydown", function(event) {
+            if (event.key === "F11" || event.key === "F12") {
+                event.stopImmediatePropagation();
+            }
+        });
+
+        window.onresize = function() {
+            canvasElement.width = canvasElement.offsetWidth;
+            canvasElement.height = canvasElement.offsetHeight;
+        };
+
+        logOutputElement.value = "";
+
+        var taisei = {
+            canvas: canvasElement,
+            preinitializedWebGLContext: glContext,
+            onFirstFrame: function() {
+                firstFrameSeen = true;
+                if (startupWatchdogId !== null) {
+                    clearTimeout(startupWatchdogId);
+                    startupWatchdogId = null;
+                }
+                canvasElement.style.zIndex = "0";
+                logToggleContainerElement.style.display = "inline-block";
+                infoContainerElement.classList.add("top");
+                setTimeout(function() {
+                    infoContainerElement.classList.add("hidden");
+                }, 5000);
+                setStatus("", true);
+            },
+            print: function(text) {
+                if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(" ");
+                console.log(text);
+                logOutputElement.value += text + "\n";
+                logOutputElement.scrollTop = logOutputElement.scrollHeight;
+            },
+            printErr: function(text) {
+                if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(" ");
+                console.error(text);
+            },
+            setStatus: setStatus
+        };
+
+        taiseiScriptElement.addEventListener("load", async function() {
+            try {
+                await createTaisei(taisei);
+                taisei.initFilesystem();
+                taisei.callMain();
+
+                startupWatchdogId = window.setTimeout(function() {
+                    if (firstFrameSeen) {
+                        return;
+                    }
+
+                    setStatus("Startup stalled. The Taisei data bundle under ./data is probably missing.", true);
+                    logOutputElement.value += "[hint] No first frame arrived. Check that the full web build resource bundle exists under ./data and that its fetches are not 404ing.\n";
+                    logOutputElement.scrollTop = logOutputElement.scrollHeight;
+                    logToggleContainerElement.style.display = "inline-block";
+                    logContainerElement.hidden = false;
+                }, 15000);
+            } catch (error) {
+                console.error(error);
+                setStatus("Boot failed: " + error, true);
+                logToggleContainerElement.style.display = "inline-block";
+                logContainerElement.hidden = false;
+            }
+        });
+    </script>
+</body>
+</html>
