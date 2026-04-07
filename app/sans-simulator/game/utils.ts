@@ -1,8 +1,39 @@
 import type { GameDims, SansFace, Vec2 } from "./types";
 
+export const BASE_WIDTH = 1920;
+export const BASE_HEIGHT = 1080;
+export const MIN_GAME_SCALE = 0.55;
+export const MAX_GAME_SCALE = 1.5;
+export const MIN_UI_SCALE = 0.72;
+export const MAX_UI_SCALE = 1.25;
+
 export const rand = (min: number, max: number) => Math.random() * (max - min) + min;
 export const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 export const hypot = (a: Vec2, b: Vec2) => Math.hypot(a.x - b.x, a.y - b.y);
+
+export function getGameScale(dims: GameDims) {
+  if (!dims.width || !dims.height) return 1;
+  return clamp(Math.min(dims.width / BASE_WIDTH, dims.height / BASE_HEIGHT), MIN_GAME_SCALE, MAX_GAME_SCALE);
+}
+
+export function getUiScale(scale: number) {
+  return clamp(Math.max(scale, MIN_UI_SCALE), MIN_UI_SCALE, MAX_UI_SCALE);
+}
+
+export function clampToGame(pos: Vec2, dims: GameDims) {
+  return {
+    x: clamp(pos.x, 0, dims.width),
+    y: clamp(pos.y, 0, dims.height),
+  };
+}
+
+export function detectTouchControls() {
+  if (typeof window === "undefined") return false;
+  return (
+    window.matchMedia("(hover: none) and (pointer: coarse)").matches ||
+    (navigator.maxTouchPoints > 0 && window.matchMedia("(pointer: coarse)").matches)
+  );
+}
 
 export const distToLine = (point: Vec2, origin: Vec2, angle: number) => {
   const dx = Math.cos(angle);
@@ -45,7 +76,7 @@ export function averagePosition(points: Vec2[]) {
   return { x: total.x / points.length, y: total.y / points.length };
 }
 
-export function pointHitsSans(pointer: Vec2, sans: SansFace) {
-  const half = sans.size * 0.42;
+export function pointHitsSans(pointer: Vec2, sans: SansFace, scale = 1) {
+  const half = sans.size * 0.42 * scale;
   return Math.abs(pointer.x - sans.pos.x) <= half && Math.abs(pointer.y - sans.pos.y) <= half;
 }

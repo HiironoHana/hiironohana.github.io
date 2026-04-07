@@ -1,9 +1,13 @@
 type Props = {
   score: number;
   onRestart: () => void;
+  uiScale?: number;
 };
 
-export default function GameOverScreen({ score, onRestart }: Props) {
+export default function GameOverScreen({ score, onRestart, uiScale = 1 }: Props) {
+  const borderWidth = Math.max(3, 4 * uiScale);
+  const outlineOffset = Math.max(6, 8 * uiScale);
+
   return (
     <div
       className="absolute inset-0 z-[220] flex items-center justify-center"
@@ -11,22 +15,22 @@ export default function GameOverScreen({ score, onRestart }: Props) {
     >
       <div
         style={{
-          border: "4px solid #fff",
-          outline: "4px solid #000",
-          outlineOffset: "-8px",
-          boxShadow: "0 0 0 8px #fff, 0 0 0 12px #000",
-          padding: "48px 56px",
+          border: `${borderWidth}px solid #fff`,
+          outline: `${borderWidth}px solid #000`,
+          outlineOffset: `-${outlineOffset}px`,
+          boxShadow: `0 0 0 ${outlineOffset}px #fff, 0 0 0 ${outlineOffset + borderWidth}px #000`,
+          padding: `${48 * uiScale}px ${56 * uiScale}px`,
           textAlign: "center",
-          maxWidth: 440,
+          maxWidth: 440 * uiScale,
           width: "90%",
           background: "#000",
         }}
       >
         <p
           style={{
-            fontSize: 13,
+            fontSize: Math.max(10, 13 * uiScale),
             color: "#aaa",
-            marginBottom: 28,
+            marginBottom: 28 * uiScale,
             letterSpacing: "0.05em",
             lineHeight: 1.7,
           }}
@@ -35,23 +39,23 @@ export default function GameOverScreen({ score, onRestart }: Props) {
         </p>
         <div
           style={{
-            fontSize: 52,
+            fontSize: Math.max(30, 52 * uiScale),
             fontWeight: 900,
             color: "#fff",
             letterSpacing: "0.08em",
-            marginBottom: 4,
-            textShadow: "4px 4px 0 #444",
+            marginBottom: 4 * uiScale,
+            textShadow: `${Math.max(2, 4 * uiScale)}px ${Math.max(2, 4 * uiScale)}px 0 #444`,
             lineHeight: 1,
           }}
         >
           GAME OVER
         </div>
-        <div style={{ height: 3, background: "#fff", margin: "20px 0" }} />
+        <div style={{ height: Math.max(2, 3 * uiScale), background: "#fff", margin: `${20 * uiScale}px 0` }} />
         <p
           style={{
-            fontSize: 14,
+            fontSize: Math.max(10, 14 * uiScale),
             color: "#aaa",
-            marginBottom: 24,
+            marginBottom: 24 * uiScale,
             fontStyle: "italic",
             letterSpacing: "0.03em",
           }}
@@ -60,21 +64,21 @@ export default function GameOverScreen({ score, onRestart }: Props) {
         </p>
         <div
           style={{
-            border: "3px solid #fff",
-            padding: "14px 0",
-            marginBottom: 28,
+            border: `${Math.max(2, 3 * uiScale)}px solid #fff`,
+            padding: `${14 * uiScale}px 0`,
+            marginBottom: 28 * uiScale,
             background: "#000",
           }}
         >
-          <div style={{ fontSize: 11, color: "#888", letterSpacing: "0.35em", marginBottom: 6 }}>
+          <div style={{ fontSize: Math.max(9, 11 * uiScale), color: "#888", letterSpacing: "0.35em", marginBottom: 6 * uiScale }}>
             SCORE
           </div>
           <div
             style={{
-              fontSize: 40,
+              fontSize: Math.max(24, 40 * uiScale),
               fontWeight: 900,
               color: "#fff",
-              textShadow: "3px 3px 0 #555",
+              textShadow: `${Math.max(2, 3 * uiScale)}px ${Math.max(2, 3 * uiScale)}px 0 #555`,
               letterSpacing: "0.1em",
             }}
           >
@@ -84,16 +88,16 @@ export default function GameOverScreen({ score, onRestart }: Props) {
         <button
           onClick={onRestart}
           style={{
-            fontSize: 16,
+            fontSize: Math.max(11, 16 * uiScale),
             fontWeight: 900,
             color: "#000",
             background: "#fff",
             border: "none",
-            padding: "12px 36px",
+            padding: `${12 * uiScale}px ${36 * uiScale}px`,
             cursor: "pointer",
             letterSpacing: "0.15em",
-            outline: "3px solid #fff",
-            outlineOffset: "3px",
+            outline: `${Math.max(2, 3 * uiScale)}px solid #fff`,
+            outlineOffset: `${Math.max(2, 3 * uiScale)}px`,
           }}
           onMouseEnter={(event) => {
             event.currentTarget.style.background = "#000";

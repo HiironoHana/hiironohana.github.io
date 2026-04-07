@@ -35,7 +35,7 @@ import type {
 } from "./game/types";
 import { PLAYER_IDS } from "./game/types";
 import { useAudio } from "./game/useAudio";
-import { clamp, distToLine, hypot, makeSans, pointHitsSans, rand } from "./game/utils";
+import { clamp, distToLine, getGameScale, hypot, makeSans, pointHitsSans, rand } from "./game/utils";
 
 type MutableState = {
   sans: SansFace[];
@@ -390,7 +390,8 @@ export function useSansSimulator() {
     }, 60);
 
     const state = stateRef.current;
-    const hit = state.sans.find((sans) => pointHitsSans(pointer, sans));
+    const hitScale = getGameScale(dimsRef.current);
+    const hit = state.sans.find((sans) => pointHitsSans(pointer, sans, hitScale));
     if (!hit) return;
 
     play("hit");
@@ -851,6 +852,8 @@ export function useSansSimulator() {
 
       const state = stateRef.current;
       const d = dimsRef.current;
+      const gameScale = getGameScale(d);
+      const beamLength = Math.max(d.width, d.height) * 3;
       const activePlayers = connectedPlayers(state.players);
       const livingPlayers = alivePlayers(state.players);
 
@@ -1017,7 +1020,7 @@ export function useSansSimulator() {
 
       for (const bone of state.bones) {
         for (const player of livingPlayers) {
-          if (hypot(bone.pos, player.pos) < 22) {
+          if (hypot(bone.pos, player.pos) < 22 * gameScale) {
             const damage = boneDamage();
             applyDamage(player.id, damage.direct, damage.karma, damage.iframes);
           }
@@ -1028,8 +1031,9 @@ export function useSansSimulator() {
         if (blaster.state !== "fire") continue;
         for (const player of livingPlayers) {
           const line = distToLine(player.pos, blaster.pos, blaster.angle);
-          if (line.dot > 0 && line.dot < 4000 && line.perp < 45 * blaster.scale) {
-            applyDamage(player.id, 0, 1.8, 0);
+          if (line.dot > 0 && line.dot < beamLength && line.perp < 45 * blaster.scale * gameScale) {
+            const tickScale = dt / 16;
+            applyDamage(player.id, 0.35 * tickScale, 1.8 * tickScale, 0);
           }
         }
       }
