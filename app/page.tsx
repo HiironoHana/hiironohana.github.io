@@ -1,130 +1,183 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { motion } from 'framer-motion';
+import Link from "next/link";
+import { motion } from "framer-motion";
+
+const projects = [
+  {
+    title: "Sans Simulator",
+    href: "/sans-simulator",
+    image: "/Images/sans_face_high_res.png",
+    kicker: "Browser boss fight",
+    description: "A fast Undertale-inspired survival arena with waves, bones, blasters, touch play, and peer lobbies.",
+    accent: "from-sky-300/22 to-white/5",
+  },
+  {
+    title: "Taisei Project MP",
+    href: "/taisei-project-mp",
+    image: "/taisei-web/background.webp",
+    kicker: "Web game port",
+    description: "A local web-hosted Taisei build with asset checks, fullscreen launch, and a cleaner fail state.",
+    accent: "from-rose-300/20 to-cyan-300/10",
+  },
+];
+
+const stats = [
+  ["10+", "years in Roblox Studio"],
+  ["C++", "Python, Luau, Unity modding"],
+  ["Motion", "Moon Animator 2 workflow"],
+];
+
+const skills = ["Gameplay systems", "Level design", "Roblox animation", "Tool scripting", "Web game builds"];
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-black text-slate-100 overflow-x-hidden" style={{ backgroundColor: '#000' }}>
-      <div className="absolute inset-0 bg-black/90 pointer-events-none" />
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 h-[140px] w-[140px] rounded-full bg-rose-700/20 blur-3xl" />
-      <main className="relative z-10">
-        <section className="relative min-h-screen flex flex-col items-center justify-center px-6 text-center overflow-hidden">
-          <div
-            className="absolute inset-0 bg-cover bg-center z-0 brightness-90"
-            style={{ backgroundImage: 'url(https://www.spriters-resource.com/media/assets/207/210640.png?updated=1755489750)' }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/50 to-black/90 z-10" />
-          <div className="relative z-20 max-w-4xl">
-            <motion.h1
-              initial={{ opacity: 0, y: -24, scale: 0.9 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ duration: 1 }}
-              className="text-6xl md:text-7xl lg:text-8xl font-[Cinzel] tracking-wide text-rose-200 drop-shadow-[0_4px_30px_rgba(231,62,111,0.8)]"
+    <main className="min-h-screen overflow-x-hidden bg-[#07080d] text-zinc-100">
+      <section className="relative flex min-h-[94svh] items-stretch overflow-hidden px-5 py-5 md:px-8">
+        <div
+          className="absolute inset-0 bg-cover bg-center opacity-48"
+          style={{ backgroundImage: "url('/taisei-web/background.webp')" }}
+        />
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,_rgba(7,8,13,0.96)_0%,_rgba(7,8,13,0.72)_46%,_rgba(7,8,13,0.42)_100%)]" />
+        <div className="absolute inset-x-0 bottom-0 h-44 bg-[linear-gradient(180deg,_transparent,_#07080d)]" />
+
+        <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-col">
+          <header className="flex items-center justify-between gap-4">
+            <Link
+              href="/"
+              className="text-sm font-bold uppercase tracking-[0.24em] text-zinc-100"
+              aria-label="Flowy home"
             >
-              Flowy&apos;s Scarlet Mansion
-            </motion.h1>
+              Flowy
+            </Link>
+            <nav className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-zinc-300">
+              <a className="px-3 py-2 transition hover:text-white" href="#work">
+                Work
+              </a>
+              <a className="px-3 py-2 transition hover:text-white" href="#profile">
+                Profile
+              </a>
+            </nav>
+          </header>
 
-            <div className="mt-8 flex flex-wrap gap-4 justify-center text-base font-medium">
-              <motion.a
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.98 }}
-                href="#about"
-                className="px-8 py-3 rounded-lg bg-rose-800/90 border-2 border-rose-300/80 text-rose-50 shadow-inner shadow-rose-900/90 hover:bg-rose-700 transition-all"
-              >
-                About Me
-              </motion.a>
-              <motion.a
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.98 }}
-                href="#projects"
-                className="px-8 py-3 rounded-lg border-2 border-rose-300/80 text-rose-100 bg-black/20 backdrop-blur-sm hover:bg-black/30 transition-all"
-              >
-                My Projects
-              </motion.a>
-            </div>
-          </div>
-        </section>
-
-        <section id="about" className="py-20 px-6 md:px-12 bg-[linear-gradient(180deg,_rgba(30,7,33,0.9),_rgba(10,3,16,0.72))]">
-          <div className="mx-auto max-w-5xl text-center">
-            <h2 className="text-4xl md:text-5xl font-extrabold text-rose-100 drop-shadow-md">About Me</h2>
-            <p className="mt-5 text-lg md:text-xl text-rose-200/90 leading-relaxed text-left">
-              I&apos;m a Game Developer with 10 years in Roblox Studio and a strong focus on fast, polished interactive
-              content. My toolkit includes:
-            </p>
-            <ul className="mt-4 list-disc list-inside text-rose-200/90 space-y-2 text-left">
-              <li>Map design & level building for immersive gameplay worlds</li>
-              <li>C++, Python, and Luau scripting for gameplay systems and tools</li>
-              <li>Unity modding and plugin extension for custom game frameworks</li>
-              <li>Roblox animation with Moon Animator 2 to produce cinematic motion</li>
-              <li>Dozens of published projects and experience across many genres</li>
-            </ul>
-            <p className="mt-4 text-lg md:text-xl text-rose-200/90 leading-relaxed text-left">
-              I balance creativity with technical discipline, delivering projects that feel strong, responsive, and
-              replay-ready.
-            </p>
-          </div>
-        </section>
-
-        <section id="projects" className="py-20 px-6 md:px-12 bg-black">
-          <div className="mx-auto max-w-6xl text-center">
-            <h2 className="text-4xl md:text-5xl font-extrabold text-rose-100">Projects</h2>
+          <div className="grid flex-1 items-center gap-10 py-14 md:grid-cols-[minmax(0,1fr)_380px] md:py-20 lg:grid-cols-[minmax(0,1fr)_430px]">
             <motion.div
-              className="mt-10 mx-auto w-full max-w-[90vw] sm:max-w-[80vw] md:max-w-[70vw] relative"
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              style={{ maxHeight: '72vh' }}
+              transition={{ duration: 0.7 }}
+              className="max-w-4xl"
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/Images/ABook.png"
-                alt="Spellbook"
-                className="mx-auto h-full w-auto max-h-[72vh]"
-                style={{ objectFit: 'contain', backgroundColor: 'black' }}
-              />
+              <p className="text-sm font-semibold uppercase tracking-[0.34em] text-cyan-200/85">
+                Game developer and interactive builder
+              </p>
+              <h1 className="mt-5 max-w-4xl text-5xl font-black leading-[0.98] text-white sm:text-6xl md:text-7xl lg:text-8xl">
+                Flowy&apos;s Scarlet Mansion
+              </h1>
+              <p className="mt-6 max-w-2xl text-base leading-8 text-zinc-200 md:text-lg">
+                I make punchy game systems, playable experiments, Roblox worlds, animation-heavy moments, and web builds
+                that feel alive from the first click.
+              </p>
 
-              <Link
-                href="/sans-simulator"
-                className="project-title absolute top-16 left-32 md:top-18 md:left-85 text-xl md:text-3xl font-[Pacifico] text-black cursor-pointer tracking-wider"
-                style={{
-                  textShadow: '0 0 10px rgba(0,0,0,0.9), 1px 1px 2px rgba(0,0,0,0.9)',
-                  padding: '0.08rem 0.22rem',
-                  borderRadius: '2px',
-                  backgroundColor: 'transparent',
-                }}
-              >
-                Sans Simulator
-              </Link>
-              <Link
-                href="/taisei-project-mp"
-                className="project-title absolute top-28 left-22 md:top-32 md:left-67 text-base md:text-[1.6rem] font-[Cinzel] text-black cursor-pointer tracking-[0.14em]"
-                style={{
-                  textShadow: '0 0 10px rgba(0,0,0,0.9), 1px 1px 2px rgba(0,0,0,0.9)',
-                  padding: '0.08rem 0.22rem',
-                  borderRadius: '2px',
-                  backgroundColor: 'transparent',
-                }}
-              >
-                Taisei Project MP
-              </Link>
-              <style jsx>{`
-                .project-title:hover {
-                  color: #f7e52a;
-                  text-shadow: 0 0 14px rgba(0, 0, 0, 0.9), 1px 1px 3px rgba(0, 0, 0, 0.95);
-                  background-color: rgba(0, 0, 0, 0.95);
-                }
-              `}</style>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Link
+                  href="/sans-simulator"
+                  className="rounded-md border border-rose-200/70 bg-rose-500 px-5 py-3 text-sm font-bold uppercase tracking-[0.16em] text-white shadow-[0_18px_50px_rgba(244,63,94,0.28)] transition hover:bg-rose-400"
+                >
+                  Play Sans Simulator
+                </Link>
+                <a
+                  href="#work"
+                  className="rounded-md border border-white/18 bg-white/8 px-5 py-3 text-sm font-bold uppercase tracking-[0.16em] text-white backdrop-blur transition hover:bg-white/14"
+                >
+                  See Projects
+                </a>
+              </div>
             </motion.div>
-          </div>
-        </section>
 
-        <footer className="py-8 text-center text-rose-200/80 border-t border-rose-300/20">
-          &copy; {new Date().getFullYear()} Flowy | Game Developer (Roblox / C++ / Python / Luau / Unity modding /
-          Moon Animator 2)
-        </footer>
-      </main>
-    </div>
+            <motion.aside
+              initial={{ opacity: 0, x: 24 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.75, delay: 0.1 }}
+              className="border border-white/12 bg-black/48 p-5 shadow-[0_24px_90px_rgba(0,0,0,0.46)] backdrop-blur-md"
+            >
+              <div className="grid gap-3">
+                {stats.map(([value, label]) => (
+                  <div key={value} className="flex items-baseline justify-between gap-5 border-b border-white/10 pb-3">
+                    <span className="text-2xl font-black text-white">{value}</span>
+                    <span className="text-right text-sm leading-6 text-zinc-300">{label}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-5 flex flex-wrap gap-2">
+                {skills.map((skill) => (
+                  <span key={skill} className="rounded-md border border-cyan-200/20 bg-cyan-200/8 px-3 py-2 text-xs text-cyan-50">
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </motion.aside>
+          </div>
+        </div>
+      </section>
+
+      <section id="work" className="px-5 py-16 md:px-8">
+        <div className="mx-auto max-w-7xl">
+          <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.3em] text-rose-200/80">Selected builds</p>
+              <h2 className="mt-3 text-3xl font-black text-white md:text-5xl">Playable Work</h2>
+            </div>
+            <p className="max-w-xl text-sm leading-7 text-zinc-300">
+              A small arcade of experiments, ports, and systems work. More can slot in here without fighting the layout.
+            </p>
+          </div>
+
+          <div className="mt-8 grid gap-5 md:grid-cols-2">
+            {projects.map((project) => (
+              <Link
+                key={project.href}
+                href={project.href}
+                className="group overflow-hidden rounded-md border border-white/12 bg-zinc-950 transition hover:-translate-y-1 hover:border-white/28"
+              >
+                <div className={`relative flex h-64 items-center justify-center bg-gradient-to-br ${project.accent}`}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={project.image}
+                    alt=""
+                    className="h-full w-full object-cover opacity-78 transition duration-500 group-hover:scale-105 group-hover:opacity-95"
+                  />
+                  <div className="absolute inset-0 bg-[linear-gradient(180deg,_rgba(0,0,0,0.06),_rgba(0,0,0,0.74))]" />
+                  <div className="absolute bottom-5 left-5 right-5">
+                    <p className="text-xs font-bold uppercase tracking-[0.24em] text-cyan-100/85">{project.kicker}</p>
+                    <h3 className="mt-2 text-2xl font-black text-white">{project.title}</h3>
+                  </div>
+                </div>
+                <p className="min-h-24 p-5 text-sm leading-7 text-zinc-300">{project.description}</p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="profile" className="px-5 pb-16 pt-4 md:px-8">
+        <div className="mx-auto grid max-w-7xl gap-8 border-t border-white/10 py-12 md:grid-cols-[0.82fr_1.18fr]">
+          <h2 className="text-3xl font-black text-white md:text-5xl">Builder Profile</h2>
+          <div className="space-y-5 text-base leading-8 text-zinc-300">
+            <p>
+              I&apos;m a game developer with a long Roblox Studio background and a practical toolkit across C++, Python,
+              Luau, Unity modding, and animation production.
+            </p>
+            <p>
+              My favorite work sits where design and implementation meet: maps that guide motion, combat loops that
+              feel responsive, tools that make iteration faster, and little web game ports that actually ship.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <footer className="border-t border-white/10 px-5 py-7 text-center text-xs uppercase tracking-[0.22em] text-zinc-500 md:px-8">
+        {new Date().getFullYear()} Flowy
+      </footer>
+    </main>
   );
 }

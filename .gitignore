@@ -23,6 +23,7 @@
 # misc
 .DS_Store
 *.pem
+.tmp-meson/
 
 # debug
 npm-debug.log*
