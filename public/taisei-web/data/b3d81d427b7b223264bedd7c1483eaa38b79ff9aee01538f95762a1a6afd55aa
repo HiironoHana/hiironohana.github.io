@@ -1,2 +1,0 @@
-
-objects = pbr.vert pbr_diffuse_alpha_discard.frag

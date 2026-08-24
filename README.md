@@ -1,45 +1,27 @@
-# Personal Website
+# Flowy's corner
 
-A modern, visually appealing personal website built with Next.js, TypeScript, Tailwind CSS, and Framer Motion for smooth animations.
+My personal site: games, Janitor creator tools, and weird web experiments.
 
-## Features
+## Run it locally
 
-- Responsive design with gradient backgrounds
-- Smooth animations using Framer Motion
-- Sections for About, Projects, and Contact
-- Ready for customization with your personal content
+```bash
+npm install
+npm run dev
+```
 
-## Getting Started
+The site is a statically exported Next.js app. `NEXT_PUBLIC_BASE_PATH` can be set when it needs to live below a domain root.
 
-1. Clone this repository
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Run the development server:
-   ```bash
-   npm run dev
-   ```
-4. Open [http://localhost:3000](http://localhost:3000) in your browser
+## Main pages
 
-## Customization
+- `/` — personal homepage and project index
+- `/janitor` — dedicated Janitor Tools hub
+- `/janitor/profile-studio` — the working visual profile editor
+- `/sans-simulator` — browser game
 
-Edit `app/page.tsx` to replace placeholder content with your personal information, projects, and contact details.
-
-## Build for Production
+## Build
 
 ```bash
 npm run build
-npm start
 ```
 
-## Deploy
-
-This project can be easily deployed to Vercel, Netlify, or any static hosting service.
-
-## Technologies Used
-
-- Next.js 16
-- TypeScript
-- Tailwind CSS
-- Framer Motion
+The static output lands in `out/`.
