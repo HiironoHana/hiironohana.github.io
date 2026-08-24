@@ -20,9 +20,9 @@ export default function Home() {
 
       <header className="fixed inset-x-0 top-0 z-40 px-4 pt-4 md:px-7">
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-4 rounded-full border border-white/10 bg-[#111016]/85 px-4 shadow-2xl shadow-black/20 backdrop-blur-xl md:px-6">
-          <Link href="/" className="group flex items-center gap-2" aria-label="Flowy home">
-            <span className="grid size-8 place-items-center rounded-full bg-[#ff8fb3] font-black text-[#1c0c13] transition group-hover:-rotate-12">F</span>
-            <span className="text-sm font-black tracking-[-.02em] text-white">flowy&apos;s corner</span>
+          <Link href="/" className="group flex items-center gap-2" aria-label="Patchies home">
+            <span className="grid size-8 place-items-center rounded-full bg-[#ff8fb3] font-black text-[#1c0c13] transition group-hover:-rotate-12">P</span>
+            <span className="text-sm font-black tracking-[-.02em] text-white">Patchies</span>
           </Link>
           <nav className="flex items-center gap-1 text-sm font-bold text-zinc-400" aria-label="Main navigation">
             <a className="hidden rounded-full px-3 py-2 transition hover:bg-white/5 hover:text-white sm:block" href="#stuff">my stuff</a>
@@ -37,7 +37,7 @@ export default function Home() {
         <div className="blob blob-blue absolute -left-48 bottom-[-12rem] size-[440px] rounded-full md:size-[620px]" />
         <div className="relative mx-auto grid min-h-[calc(100svh-10rem)] max-w-7xl items-center gap-14 lg:grid-cols-[minmax(0,1.25fr)_minmax(300px,.55fr)]">
           <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .6 }}>
-            <p className="mb-6 w-fit -rotate-2 rounded-full border border-[#ff8fb3]/35 bg-[#ff8fb3]/10 px-4 py-2 text-xs font-black text-[#ffc4d6]">hey, i&apos;m Flowy 👋</p>
+            <p className="mb-6 w-fit -rotate-2 rounded-full border border-[#ff8fb3]/35 bg-[#ff8fb3]/10 px-4 py-2 text-xs font-black text-[#ffc4d6]">hey, i&apos;m Patchies 👋</p>
             <h1 className="max-w-5xl text-5xl font-black leading-[.9] tracking-[-.065em] text-white sm:text-7xl md:text-8xl xl:text-[7.5rem]">I make weird little things <span className="scribble text-[#ff8fb3]">for the internet.</span></h1>
             <p className="mt-8 max-w-2xl text-lg leading-8 text-zinc-300">Games, tools, chaotic experiments, whatever looked fun at 2 AM. If it moves, makes noise, or saves me from doing something manually, I&apos;m probably building it.</p>
             <div className="mt-9 flex flex-wrap items-center gap-3">
@@ -136,7 +136,7 @@ export default function Home() {
 
       <footer className="px-5 pb-8 md:px-8">
         <div className="mx-auto flex max-w-7xl flex-col gap-3 border-t border-white/10 pt-7 text-xs font-bold text-zinc-500 sm:flex-row sm:items-center sm:justify-between">
-          <span>© {new Date().getFullYear()} Flowy. built with code and bad sleep habits.</span>
+          <span>© {new Date().getFullYear()} Patchies. built with code and bad sleep habits.</span>
           <span>games • tools • weird web stuff</span>
         </div>
       </footer>

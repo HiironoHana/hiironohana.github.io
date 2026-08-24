@@ -1,4 +1,4 @@
-# Flowy's corner
+# Patchies
 
 My personal site: games, Janitor creator tools, and weird web experiments.
 

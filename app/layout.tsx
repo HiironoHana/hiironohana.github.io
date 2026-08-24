@@ -4,24 +4,24 @@ import "./globals.css";
 export const metadata: Metadata = {
   metadataBase: new URL("https://hiironohana.github.io"),
   title: {
-    default: "Flowy's corner — games, tools & weird web stuff",
-    template: "%s | Flowy",
+    default: "Patchies — games, tools & weird web stuff",
+    template: "%s | Patchies",
   },
-  description: "Flowy's little corner of the internet: games, Janitor creator tools, playable experiments, and other weird things.",
+  description: "Patchies' little corner of the internet: games, Janitor creator tools, playable experiments, and other weird things.",
   alternates: {
     canonical: "/",
   },
   openGraph: {
-    title: "Flowy's corner",
-    description: "Games, tools & weird web stuff—built by Flowy.",
+    title: "Patchies",
+    description: "Games, tools & weird web stuff—built by Patchies.",
     type: "website",
     url: "https://hiironohana.github.io",
-    images: [{ url: "/og.png", width: 1731, height: 908, alt: "Flowy's corner — games, tools & weird web stuff" }],
+    images: [{ url: "/og.png", width: 1731, height: 908, alt: "Patchies — games, tools & weird web stuff" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Flowy's corner",
-    description: "Games, tools & weird web stuff—built by Flowy.",
+    title: "Patchies",
+    description: "Games, tools & weird web stuff—built by Patchies.",
     images: ["/og.png"],
   },
 };

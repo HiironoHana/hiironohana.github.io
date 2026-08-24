@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Janitor Tools — made by Flowy",
+  title: "Janitor Tools — made by Patchies",
   description: "Free, practical tools for making and maintaining Janitor.AI profiles without losing your mind to CSS.",
 };
 
@@ -27,8 +27,8 @@ export default function JanitorHub() {
       <header className="relative z-20 px-4 pt-4 md:px-7">
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-4 rounded-full border border-white/10 bg-[#0d1216]/85 px-4 shadow-2xl shadow-black/20 backdrop-blur-xl md:px-6">
           <Link href="/" className="group flex items-center gap-2 text-sm font-black text-white">
-            <span className="grid size-8 place-items-center rounded-full bg-[#ff8fb3] text-[#1c0c13] transition group-hover:-rotate-12">F</span>
-            <span>back to Flowy&apos;s corner</span>
+            <span className="grid size-8 place-items-center rounded-full bg-[#ff8fb3] text-[#1c0c13] transition group-hover:-rotate-12">P</span>
+            <span>back to Patchies</span>
           </Link>
           <span className="hidden rounded-full bg-[#b8f4ff]/10 px-3 py-2 text-xs font-black text-[#b8f4ff] sm:block">janitor tools / not affiliated, just stubborn</span>
         </div>
@@ -91,7 +91,7 @@ export default function JanitorHub() {
         </div>
       </section>
 
-      <footer className="px-5 pb-8 md:px-8"><div className="mx-auto flex max-w-7xl flex-col gap-3 border-t border-white/10 pt-7 text-xs font-bold text-zinc-500 sm:flex-row sm:items-center sm:justify-between"><span>made by Flowy, because apparently I enjoy CSS</span><Link href="/" className="transition hover:text-white">back to the main site ↑</Link></div></footer>
+      <footer className="px-5 pb-8 md:px-8"><div className="mx-auto flex max-w-7xl flex-col gap-3 border-t border-white/10 pt-7 text-xs font-bold text-zinc-500 sm:flex-row sm:items-center sm:justify-between"><span>made by Patchies, because apparently I enjoy CSS</span><Link href="/" className="transition hover:text-white">back to the main site ↑</Link></div></footer>
     </main>
   );
 }
