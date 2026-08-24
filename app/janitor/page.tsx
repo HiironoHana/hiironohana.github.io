@@ -62,8 +62,8 @@ export default function JanitorHub() {
             <div className="flex flex-col justify-center border-t border-white/10 bg-black/20 p-7 md:p-11 lg:border-l lg:border-t-0">
               <span className="w-fit rounded-full bg-[#b8f4ff] px-3 py-1.5 text-xs font-black text-[#07171a]">live right now</span>
               <h2 className="mt-5 text-4xl font-black tracking-[-.045em] text-white md:text-6xl">Profile Studio</h2>
-              <p className="mt-5 text-base leading-8 text-zinc-300">Build a complete profile theme with a real preview, visual controls, image tools, widgets, raw CSS when you want it, and guardrails for the stuff Janitor simply strips out.</p>
-              <div className="mt-7 flex flex-wrap gap-2">{["live preview", "element picker", "image library", "undo + redo", "CSS export"].map(tag => <span key={tag} className="rounded-full border border-white/10 bg-white/[.04] px-3 py-2 text-xs font-bold text-zinc-400">{tag}</span>)}</div>
+              <p className="mt-5 text-base leading-8 text-zinc-300">Import a saved Janitor page, edit against the real profile structure, and export the complete About Me source—CSS and HTML together, exactly where Janitor actually stores them.</p>
+              <div className="mt-7 flex flex-wrap gap-2">{["real page preview", "saved-page import", "element picker", "image library", "complete source export"].map(tag => <span key={tag} className="rounded-full border border-white/10 bg-white/[.04] px-3 py-2 text-xs font-bold text-zinc-400">{tag}</span>)}</div>
               <strong className="mt-9 text-sm text-[#b8f4ff]">open Profile Studio <span className="inline-block transition group-hover:translate-x-2">→</span></strong>
             </div>
           </Link>

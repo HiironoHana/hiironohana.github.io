@@ -121,8 +121,10 @@
 .add { width: 100%; margin-bottom: 10px; color: var(--rose-dark); background: #fff8fa; border-style: dashed; }
 .widget-card { position: relative; display: flex; flex-direction: column; gap: 10px; margin-top: 9px; padding: 12px; background: white; border: 1px solid var(--line); border-radius: 8px; }
 .widget-card .remove { align-self: flex-start; padding: 5px 8px; color: #a13152; background: #fff6f8; font-size: 9px; }
-.html-output, .code-editor, .small-code { width: 100%; resize: vertical; outline: 0; border: 1px solid #332a33; border-radius: 7px; background: #171319; color: #efe5ed; font: 10px/1.55 Consolas, "Courier New", monospace; }
+.html-output, .html-editor, .source-output, .code-editor, .small-code { width: 100%; resize: vertical; outline: 0; border: 1px solid #332a33; border-radius: 7px; background: #171319; color: #efe5ed; font: 10px/1.55 Consolas, "Courier New", monospace; }
 .html-output { height: 160px; padding: 12px; margin-bottom: 8px; }
+.html-editor { height: 280px; padding: 13px; margin: 11px 0; tab-size: 2; }
+.source-output { height: 190px; padding: 13px; margin-bottom: 10px; color: #d9cbd5; background: #201b21; }
 .code-editor { height: 440px; padding: 14px; margin: 11px 0; tab-size: 2; }
 .small-code { height: 150px; padding: 12px; }
 .wide { width: 100%; }
@@ -200,6 +202,12 @@
   .history-actions button:nth-child(3) { display: none; }
   .rail { padding-inline: 5px; }
   .element-tools select { width: 145px; }
+}
+@media (max-width: 1240px) {
+  .topbar { gap: 12px; }
+  .identity { min-width: 235px; }
+  .top-actions button { padding-inline: 8px; }
+  .top-actions button:nth-child(2) { display: none; }
 }
 @media (max-width: 760px) {
   .studio { overflow: auto; }
