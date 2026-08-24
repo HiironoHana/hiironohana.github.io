@@ -73,8 +73,9 @@
 @keyframes editor-flash { 0%,100% { background: transparent; } 35% { background: #f5dce5; box-shadow: 0 0 0 7px #f5dce5; } }
 
 .field, .select-field, .range-field, .color-field { display: flex; flex-direction: column; gap: 5px; color: #746a72; font-size: 9px; }
-.field input, .select-field select { width: 100%; min-height: 35px; padding: 8px 9px; color: #50484f; background: white; border: 1px solid var(--line); border-radius: 6px; outline: 0; }
-.field input:focus, .select-field select:focus, .color-field div:focus-within, textarea:focus { border-color: var(--rose); box-shadow: 0 0 0 2px #b5466914; }
+.field input, .field textarea, .select-field select { width: 100%; min-height: 35px; padding: 8px 9px; color: #50484f; background: white; border: 1px solid var(--line); border-radius: 6px; outline: 0; }
+.field textarea { min-height: 82px; resize: vertical; line-height: 1.45; }
+.field input:focus, .field textarea:focus, .select-field select:focus, .color-field div:focus-within, textarea:focus { border-color: var(--rose); box-shadow: 0 0 0 2px #b5466914; }
 .color-field div { display: flex; height: 35px; overflow: hidden; background: white; border: 1px solid var(--line); border-radius: 6px; }
 .color-field input[type="color"] { flex: none; width: 37px; height: 35px; padding: 3px; background: white; border: 0; }
 .color-field input:last-child { min-width: 0; width: 100%; padding: 0 6px; color: #51494f; background: white; border: 0; outline: 0; font: 9px Consolas, monospace; }
@@ -121,6 +122,13 @@
 .add { width: 100%; margin-bottom: 10px; color: var(--rose-dark); background: #fff8fa; border-style: dashed; }
 .widget-card { position: relative; display: flex; flex-direction: column; gap: 10px; margin-top: 9px; padding: 12px; background: white; border: 1px solid var(--line); border-radius: 8px; }
 .widget-card .remove { align-self: flex-start; padding: 5px 8px; color: #a13152; background: #fff6f8; font-size: 9px; }
+.mini-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+.tag-builder { display: flex; gap: 6px; }
+.tag-builder input { min-width: 0; flex: 1; }
+.tag-builder button { flex: none; color: white; background: var(--ink); border-color: var(--ink); font-size: 9px; }
+.preview-tag-list { display: flex; flex-wrap: wrap; gap: 5px; }
+.preview-tag-list button { padding: 5px 7px; color: #67505e; background: #f7edf1; border-color: #decbd2; font-size: 8px; }
+.preview-tag-list button:hover { color: #9c294d; border-color: #bd7088; }
 .html-output, .html-editor, .source-output, .code-editor, .small-code { width: 100%; resize: vertical; outline: 0; border: 1px solid #332a33; border-radius: 7px; background: #171319; color: #efe5ed; font: 10px/1.55 Consolas, "Courier New", monospace; }
 .html-output { height: 160px; padding: 12px; margin-bottom: 8px; }
 .html-editor { height: 280px; padding: 13px; margin: 11px 0; tab-size: 2; }
