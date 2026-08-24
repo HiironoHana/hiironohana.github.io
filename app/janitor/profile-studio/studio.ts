@@ -3,6 +3,9 @@ export type BorderStyle = "solid" | "dashed" | "dotted" | "double" | "none";
 export type ClipShape = "none" | "circle" | "diamond" | "hexagon";
 export type CharacterSection = "tabs" | "count" | "filters" | "cards";
 export type ProfileSection = "identity" | "about" | "widgets" | "follow";
+export type MotionStyle = "none" | "float" | "pulse" | "glow" | "slide";
+export type ElementOffset = { x: number; y: number };
+export type EditorTarget = { id: string; label: string; selector: string; panel: "canvas" | "layout" | "content" | "profile" | "type" | "cards" | "controls" | "images" | "widgets" | "code" | "support" | "explorer"; kind: "layout" | "element" };
 
 export type StudioConfig = {
   pageColor: string; pageImage: string; pageSize: "cover" | "contain" | "auto"; pagePosition: string;
@@ -11,6 +14,7 @@ export type StudioConfig = {
   overlayColor: string; overlayOpacity: number; overlayImage: string; overlayImageOpacity: number; vignette: number;
   maxWidth: number; layout: LayoutMode; layoutGap: number; profileWidth: number; profileSticky: boolean;
   profileOffsetX: number; profileOffsetY: number; cardsOffsetX: number; cardsOffsetY: number;
+  elementOffsets: Record<string, ElementOffset>;
   characterOrder: CharacterSection[]; profileOrder: ProfileSection[];
   profileColor: string; profileGradientTo: string; profileGradient: boolean; profileImage: string; profilePadding: number;
   profileRadius: number; profileBorderWidth: number; profileBorderStyle: BorderStyle; profileBorderColor: string;
@@ -31,11 +35,12 @@ export type StudioConfig = {
   tagColor: string; tagTextColor: string; tagBorderColor: string; tagRadius: number; tagSize: number; tagGap: number;
   ribbonColor: string; starFilter: string; hideStar: boolean; hideTokens: boolean; hideTags: boolean; hideCreator: boolean; hideDescription: boolean; hideRibbon: boolean;
   headerColor: string; headerGradientTo: string; headerGradient: boolean; headerTextColor: string; headerBorderColor: string;
-  headerHeight: number; headerBlur: number; hideHeader: boolean;
-  tabColor: string; tabTextColor: string; tabActiveColor: string;
+  headerHeight: number; headerBlur: number; headerLogoColor: string; headerSearchColor: string; headerSearchTextColor: string; headerCreateColor: string; headerIconColor: string; headerRadius: number; headerAnimation: MotionStyle; hideHeader: boolean;
+  tabColor: string; tabTextColor: string; tabActiveColor: string; tabRadius: number; tabGlow: number; tabAnimation: MotionStyle;
+  searchColor: string; searchTextColor: string; searchBorderColor: string; searchRadius: number; searchWidth: number; searchAnimation: MotionStyle;
   controlColor: string; controlTextColor: string; controlBorderColor: string; controlRadius: number; controlGlow: number;
   followLabel: string; hideFollowers: boolean; hideMemberSince: boolean; hideSearch: boolean; hideAbout: boolean;
-  footerColor: string; footerTextColor: string; hideFooter: boolean;
+  footerColor: string; footerTextColor: string; footerBorderColor: string; footerHeight: number; footerAlign: "left" | "center" | "space-between"; footerAnimation: MotionStyle; hideFooter: boolean;
   breakpoint: number; mobileCardWidth: number; mobilePadding: number; hideOverlayMobile: boolean;
   imageFilterAll: string; imageHoverRestoreAll: boolean; selectionColor: string; scrollbarColor: string;
   customCss: string;
@@ -47,7 +52,8 @@ export type PageDoll = { id: number; image: string; alt: string; width: number; 
 export type DetailBlock = { id: number; summary: string; content: string; open: boolean };
 export type ImageAsset = { id: number; name: string; url: string; source: "ella-approved" | "ella" | "external" };
 export type HostedExperience = { id: number; title: string; description: string; url: string; kind: "game" | "tool" | "social"; label: string };
-export type Widgets = { links: LinkButton[]; imageButtons: ImageButton[]; dolls: PageDoll[]; details: DetailBlock[]; assets: ImageAsset[]; experiences: HostedExperience[] };
+export type ExplorerItem = { id: number; name: string; kind: "text" | "image" | "box"; content: string; url: string; x: number; y: number; width: number; color: string; background: string; fontSize: number; radius: number; animation: MotionStyle };
+export type Widgets = { links: LinkButton[]; imageButtons: ImageButton[]; dolls: PageDoll[]; details: DetailBlock[]; assets: ImageAsset[]; experiences: HostedExperience[]; layers: ExplorerItem[] };
 export type Diagnostic = { level: "error" | "warning" | "info"; message: string };
 export type PreviewProfileData = { username: string; followers: string; avatarUrl: string };
 export type PreviewBotData = { id: number; name: string; description: string; chats: string; tokens: string; image: string; tags: string[] };
@@ -58,6 +64,7 @@ export const defaults: StudioConfig = {
   overlayColor: "#000000", overlayOpacity: 12, overlayImage: "", overlayImageOpacity: 20, vignette: 28,
   maxWidth: 1740, layout: "left", layoutGap: 30, profileWidth: 540, profileSticky: false,
   profileOffsetX: 0, profileOffsetY: 0, cardsOffsetX: 0, cardsOffsetY: 0,
+  elementOffsets: {},
   characterOrder: ["tabs","count","filters","cards"], profileOrder: ["identity","about","widgets","follow"],
   profileColor: "#292a2f", profileGradientTo: "#202126", profileGradient: false, profileImage: "", profilePadding: 12,
   profileRadius: 8, profileBorderWidth: 1, profileBorderStyle: "solid", profileBorderColor: "#696a72",
@@ -75,17 +82,18 @@ export const defaults: StudioConfig = {
   tagColor: "#251d30", tagTextColor: "#eee8f4", tagBorderColor: "#77649e", tagRadius: 6, tagSize: 10, tagGap: 5,
   ribbonColor: "#8f25d2", starFilter: "none", hideStar: false, hideTokens: false, hideTags: false, hideCreator: false, hideDescription: false, hideRibbon: false,
   headerColor: "#38393f", headerGradientTo: "#303136", headerGradient: false, headerTextColor: "#eeeeef", headerBorderColor: "#55565d",
-  headerHeight: 58, headerBlur: 0, hideHeader: false,
-  tabColor: "#15161b", tabTextColor: "#30dce3", tabActiveColor: "#30dce3",
+  headerHeight: 64, headerBlur: 0, headerLogoColor: "#f78af0", headerSearchColor: "#4b4c53", headerSearchTextColor: "#bebec4", headerCreateColor: "#34353b", headerIconColor: "#494a50", headerRadius: 0, headerAnimation: "none", hideHeader: false,
+  tabColor: "#15161b", tabTextColor: "#30dce3", tabActiveColor: "#30dce3", tabRadius: 0, tabGlow: 0, tabAnimation: "none",
+  searchColor: "#24252a", searchTextColor: "#eeeeef", searchBorderColor: "#65666d", searchRadius: 8, searchWidth: 230, searchAnimation: "none",
   controlColor: "#24252a", controlTextColor: "#eeeeef", controlBorderColor: "#65666d", controlRadius: 8, controlGlow: 0,
   followLabel: "Follow", hideFollowers: false, hideMemberSince: false, hideSearch: false, hideAbout: false,
-  footerColor: "#17171a", footerTextColor: "#aaa5ad", hideFooter: false,
+  footerColor: "#17171a", footerTextColor: "#aaa5ad", footerBorderColor: "#333138", footerHeight: 50, footerAlign: "space-between", footerAnimation: "none", hideFooter: false,
   breakpoint: 700, mobileCardWidth: 190, mobilePadding: 12, hideOverlayMobile: true,
   imageFilterAll: "none", imageHoverRestoreAll: false, selectionColor: "#d763dd", scrollbarColor: "#d763dd",
   customCss: "",
 };
 
-export const emptyWidgets: Widgets = { links: [], imageButtons: [], dolls: [], details: [], assets: [], experiences: [] };
+export const emptyWidgets: Widgets = { links: [], imageButtons: [], dolls: [], details: [], assets: [], experiences: [], layers: [] };
 export const defaultPreviewProfile: PreviewProfileData = { username: "ExampleCreator", followers: "128", avatarUrl: "" };
 export const defaultPreviewBots: PreviewBotData[] = [{
   id: 1,
@@ -96,6 +104,41 @@ export const defaultPreviewBots: PreviewBotData[] = [{
   image: "",
   tags: ["Limitless", "Test Bot", "#custom-tag"],
 }];
+
+export const editableTargets: EditorTarget[] = [
+  {id:"page",label:"Page background",selector:".profile-page-background",panel:"canvas",kind:"layout"},
+  {id:"header",label:"Top bar",selector:".profile-top-bar-flex-outer",panel:"controls",kind:"layout"},
+  {id:"profile",label:"Profile panel",selector:".profile-uc-background",panel:"profile",kind:"layout"},
+  {id:"tabs",label:"Character tabs",selector:".profile-tabs-wrapper",panel:"controls",kind:"layout"},
+  {id:"count",label:"Character count",selector:".profile-badge-flex-outer",panel:"layout",kind:"layout"},
+  {id:"filters",label:"Search and filters",selector:".profile-filters-flex-outer",panel:"controls",kind:"layout"},
+  {id:"cards",label:"Bot-card area",selector:".pp-cc-list-container",panel:"cards",kind:"layout"},
+  {id:"footer",label:"Bottom bar",selector:".pp-footer",panel:"controls",kind:"layout"},
+  {id:"logo",label:"Janitor logo",selector:".profile-top-bar-logo-box",panel:"controls",kind:"element"},
+  {id:"top-search",label:"Top search bar",selector:".profile-top-bar-search-wrapper",panel:"controls",kind:"element"},
+  {id:"create",label:"Create Character button",selector:".profile-top-bar-create-char",panel:"controls",kind:"element"},
+  {id:"top-icons",label:"Top-bar icons",selector:".pp-top-bar-right .top-icon",panel:"controls",kind:"element"},
+  {id:"avatar",label:"Profile avatar",selector:".profile-avatar",panel:"profile",kind:"element"},
+  {id:"title",label:"Profile name",selector:".profile-title-heading",panel:"type",kind:"element"},
+  {id:"followers",label:"Follower count",selector:".profile-followers-count",panel:"type",kind:"element"},
+  {id:"member",label:"Member line",selector:".profile-member-since-box",panel:"type",kind:"element"},
+  {id:"about",label:"About Me",selector:".profile-about-me",panel:"widgets",kind:"element"},
+  {id:"follow",label:"Follow button",selector:".profile-uc-follow-button",panel:"controls",kind:"element"},
+  {id:"character-search",label:"Character search box",selector:".profile-character-search-input-group",panel:"controls",kind:"element"},
+  {id:"filter-button",label:"Filter button",selector:".profile-filter-button",panel:"controls",kind:"element"},
+  {id:"sort",label:"Sort button",selector:".sort-control",panel:"controls",kind:"element"},
+  {id:"card",label:"Bot card",selector:".profile-character-card-wrapper",panel:"cards",kind:"element"},
+  {id:"card-name",label:"Bot name",selector:".profile-character-card-name-box",panel:"cards",kind:"element"},
+  {id:"card-art",label:"Bot artwork",selector:".profile-character-card-avatar-image",panel:"cards",kind:"element"},
+  {id:"ribbon",label:"Chat ribbon",selector:".profile-character-card-ribbon",panel:"cards",kind:"element"},
+  {id:"creator",label:"Creator name",selector:".profile-character-card-creator-name-box",panel:"cards",kind:"element"},
+  {id:"description",label:"Bot description",selector:".profile-character-card-description-box",panel:"cards",kind:"element"},
+  {id:"star",label:"Card star",selector:".profile-character-card-star-line",panel:"cards",kind:"element"},
+  {id:"tags",label:"Bot tags",selector:".profile-character-card-tags",panel:"cards",kind:"element"},
+  {id:"tokens",label:"Token count",selector:".profile-character-card-tokens-count",panel:"cards",kind:"element"},
+  {id:"footer-copy",label:"Footer label",selector:".pp-footer > span:first-child",panel:"controls",kind:"element"},
+  {id:"footer-links",label:"Footer links",selector:".footer-links",panel:"controls",kind:"element"},
+];
 
 export const presets: Record<string, Partial<StudioConfig>> = {
   Janitor: {},
@@ -151,6 +194,11 @@ export function generateCss(c:StudioConfig, widgets:Widgets){
   const cardBackground = background(c.cardColor,c.cardGradientTo,c.cardGradient,c.cardImage);
   const pageFilter = `blur(${c.pageBlur}px) brightness(${c.pageBrightness}%) contrast(${c.pageContrast}%) saturate(${c.pageSaturate}%)`;
   const rules:string[] = [];
+  const addMotion=(name:string,motion:MotionStyle,selector:string)=>{
+    if(motion==="none")return;
+    const frames=motion==="float"?"0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}":motion==="pulse"?"0%,100%{transform:scale(1)}50%{transform:scale(1.025)}":motion==="glow"?"0%,100%{filter:drop-shadow(0 0 0 transparent)}50%{filter:drop-shadow(0 0 10px currentColor)}":"0%{opacity:0;transform:translateX(-18px)}100%{opacity:1;transform:translateX(0)}";
+    rules.push(`@keyframes jps-${name}-${motion}{${frames}} ${selector}{animation:jps-${name}-${motion} ${motion==="slide"?".5s":"3.2s"} ease-in-out ${motion==="slide"?"1":"infinite"}!important}`);
+  };
   rules.push(`/* Janitor Profile Studio — validator-safe semantic selectors */`);
   rules.push(`.pp-page-background, .profile-page-background {
   background-color: ${c.pageColor} !important;${c.pageImage ? `\n  background-image: url("${safeUrl(c.pageImage)}") !important;` : ""}
@@ -197,7 +245,7 @@ export function generateCss(c:StudioConfig, widgets:Widgets){
   rules.push(`.profile-info-wrapper-box > .profile-info-stack { display: flex !important; flex-direction: column !important; } .profile-info-wrapper-box > .profile-info-stack > .profile-info-hstack { order: ${profileOrder.identity} !important; } .profile-info-wrapper-box > .profile-info-stack > .profile-about-me, .profile-info-wrapper-box > .profile-info-stack > .pp-uc-about-me { order: ${Math.min(profileOrder.about,profileOrder.widgets)} !important; } .profile-info-wrapper-box > .profile-info-stack > .pp-uc-follow-button, .profile-info-wrapper-box > .profile-info-stack > .profile-uc-follow-button { order: ${profileOrder.follow} !important; }`);
   rules.push(`.pp-uc-followers-count, .profile-followers-count, .pp-uc-member-since, .profile-member-since-box { color: ${c.mutedColor} !important; }`);
   rules.push(`.profile-character-card-creator-name-link, .profile-character-card-creator-name-box { color: ${c.linkColor} !important; } .profile-character-card-creator-name-link:hover { color: ${c.linkHoverColor} !important; }`);
-  rules.push(`.profile-tabs-chakra-tabs { display: flex !important; flex-direction: column !important; } .profile-tabs-wrapper { order: ${characterOrder.tabs} !important; } .profile-badge-flex-outer { order: ${characterOrder.count} !important; } .profile-filters-flex-outer { order: ${characterOrder.filters} !important; } .pp-cc-list-container, .card-row { order: ${characterOrder.cards} !important; display: flex !important; flex-wrap: wrap !important; gap: ${c.cardGap}px !important; justify-content: ${c.cardJustify} !important; }`);
+  rules.push(`.profile-tabs-chakra-tabs { display: flex !important; flex-direction: column !important; } .profile-tabs-panels, .profile-tab-panel, .characters-list-container-flex, .character-list-pagination-flex { display: contents !important; } .profile-tabs-wrapper { order: ${characterOrder.tabs} !important; } .profile-badge-flex-outer { order: ${characterOrder.count} !important; } .profile-filters-flex-outer { order: ${characterOrder.filters} !important; } .pp-cc-list-container, .card-row { order: ${characterOrder.cards} !important; display: flex !important; flex-wrap: wrap !important; gap: ${c.cardGap}px !important; justify-content: ${c.cardJustify} !important; }`);
   rules.push(`.pp-cc-wrapper, .profile-character-card-wrapper {
   width: ${c.cardWidth}px !important; min-width: ${c.cardWidth}px !important; max-width: ${c.cardWidth}px !important; flex-basis: ${c.cardWidth}px !important;
   min-height: ${c.cardMinHeight}px !important; overflow: hidden !important; border: ${c.cardBorderWidth}px ${c.cardBorderStyle} ${c.cardBorderColor} !important;
@@ -219,18 +267,25 @@ export function generateCss(c:StudioConfig, widgets:Widgets){
   rules.push(`.profile-character-card-ribbon, .css-wexxj8 { background: ${c.ribbonColor} !important; } .pp-cc-star, .profile-character-card-star { filter: ${c.starFilter} !important; -webkit-filter: ${c.starFilter} !important; }`);
   rules.push(`.profile-top-bar-flex-outer, .pp-top-bar-outer {
   min-height: ${c.headerHeight}px !important; color: ${c.headerTextColor} !important; background: ${c.headerGradient ? `linear-gradient(180deg, ${c.headerColor}, ${c.headerGradientTo})` : c.headerColor} !important;
-  border-bottom: 1px solid ${c.headerBorderColor} !important;${c.headerBlur ? `\n  backdrop-filter: blur(${c.headerBlur}px); -webkit-backdrop-filter: blur(${c.headerBlur}px);` : ""}
+  border-bottom: 1px solid ${c.headerBorderColor} !important; border-radius: ${c.headerRadius}px !important;${c.headerBlur ? `\n  backdrop-filter: blur(${c.headerBlur}px); -webkit-backdrop-filter: blur(${c.headerBlur}px);` : ""}
 }`);
-  rules.push(`.pp-tabs-wrapper, .profile-tabs-wrapper { background: ${c.tabColor} !important; border-color: ${c.tabActiveColor} !important; } .pp-tabs-button, .profile-tabs-button { color: ${c.tabTextColor} !important; background: ${c.tabColor} !important; } .pp-tabs-button[aria-selected="true"], .profile-tabs-button[aria-selected="true"] { color: ${c.tabActiveColor} !important; } .profile-tabs-indicator { background: ${c.tabActiveColor} !important; }`);
+  rules.push(`.profile-top-bar-logo-box, .profile-top-bar-logo-name, .profile-top-bar-logo-sub-name { color: ${c.headerLogoColor} !important; } .profile-top-bar-search-box { color: ${c.headerSearchTextColor} !important; background: ${c.headerSearchColor} !important; border-radius: ${Math.max(4,c.headerRadius)}px !important; } .profile-top-bar-search { color: ${c.headerSearchTextColor} !important; } .profile-top-bar-create-char { color: ${c.headerTextColor} !important; background: ${c.headerCreateColor} !important; border-color: ${c.headerBorderColor} !important; border-radius: ${Math.max(4,c.headerRadius)}px !important; } .pp-top-bar-right .top-icon { color: ${c.headerTextColor} !important; background: ${c.headerIconColor} !important; border-radius: ${Math.max(4,c.headerRadius)}px !important; }`);
+  rules.push(`.pp-tabs-wrapper, .profile-tabs-wrapper { background: ${c.tabColor} !important; border-color: ${c.tabActiveColor} !important; border-radius: ${c.tabRadius}px !important; overflow: hidden !important; box-shadow: ${c.tabGlow?`0 0 ${c.tabGlow}px ${rgba(c.tabActiveColor,60)}`:"none"} !important; } .pp-tabs-button, .profile-tabs-button { color: ${c.tabTextColor} !important; background: ${c.tabColor} !important; } .pp-tabs-button[aria-selected="true"], .profile-tabs-button[aria-selected="true"] { color: ${c.tabActiveColor} !important; } .profile-tabs-indicator { background: ${c.tabActiveColor} !important; }`);
   rules.push(`.pp-fl-search-input, .profile-character-search-input, .pp-fl-filter-button, .profile-filter-button, .transparent .react-select__control {
-  color: ${c.controlTextColor} !important; background: ${c.controlColor} !important; border: 1px solid ${c.controlBorderColor} !important; border-radius: ${c.controlRadius}px !important;
+  color: ${c.searchTextColor} !important; background: ${c.searchColor} !important; border: 1px solid ${c.searchBorderColor} !important; border-radius: ${c.searchRadius}px !important;
 }`);
+  rules.push(`.profile-character-search-input-group { width: ${c.searchWidth}px !important; min-width: ${c.searchWidth}px !important; } .sort-control { color: ${c.searchTextColor} !important; background: ${c.searchColor} !important; border-color: ${c.searchBorderColor} !important; border-radius: ${c.searchRadius}px !important; }`);
   rules.push(`.Btn, .Btn2, .Btn2-purple, .pp-uc-follow-button, .profile-uc-follow-button, .pressable-button, .jps-link-button {
   color: ${c.controlTextColor} !important; background: ${c.controlColor} !important; border: 1px solid ${c.controlBorderColor} !important;
   border-radius: ${c.controlRadius}px !important; text-decoration: none !important; box-shadow: ${c.controlGlow ? `0 0 ${c.controlGlow}px ${rgba(c.controlBorderColor,55)}` : "none"} !important;
 }`);
   if(c.followLabel !== "Follow") rules.push(`.pp-uc-follow-text, .profile-uc-follow-text { font-size: 0 !important; } .pp-uc-follow-text::after, .profile-uc-follow-text::after { content: "${safeText(c.followLabel)}"; font-size: ${c.bodySize}px; }`);
-  rules.push(`footer { color: ${c.footerTextColor} !important; background: ${c.footerColor} !important; }`);
+  rules.push(`.pp-footer, footer { min-height: ${c.footerHeight}px !important; color: ${c.footerTextColor} !important; background: ${c.footerColor} !important; border-top: 1px solid ${c.footerBorderColor} !important; justify-content: ${c.footerAlign==="left"?"flex-start":c.footerAlign} !important; } .pp-footer a, footer a { color: ${c.footerTextColor} !important; }`);
+  addMotion("header",c.headerAnimation,".profile-top-bar-flex-outer, .pp-top-bar-outer");
+  addMotion("tabs",c.tabAnimation,".pp-tabs-wrapper, .profile-tabs-wrapper");
+  addMotion("search",c.searchAnimation,".profile-filters-flex-outer");
+  addMotion("footer",c.footerAnimation,".pp-footer, footer");
+  Object.entries(c.elementOffsets||{}).forEach(([id,offset])=>{const target=editableTargets.find(item=>item.id===id);if(target&&(offset.x||offset.y)){const positioned=["page","header","profile","tabs","cards","footer"].includes(id)?"":"position:relative!important;";rules.push(`${target.selector}{${positioned}left:${Math.round(offset.x)}px!important;top:${Math.round(offset.y)}px!important}`)}});
   if(c.imageFilterAll !== "none") rules.push(`.profile-page-container img { filter: ${c.imageFilterAll}; -webkit-filter: ${c.imageFilterAll}; transition: filter .2s ease; }${c.imageHoverRestoreAll ? ` .profile-page-container img:hover { filter: none; -webkit-filter: none; }` : ""}`);
   if(c.hideStar) rules.push(`.pp-cc-star, .profile-character-card-star { visibility: hidden !important; }`);
   if(c.hideTokens) rules.push(`.pp-cc-tokens-count, .profile-character-card-tokens-count { display: none !important; }`);
@@ -252,6 +307,7 @@ export function generateCss(c:StudioConfig, widgets:Widgets){
   if(widgets.imageButtons.length) rules.push(`.jps-image-buttons { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; } .jps-image-button img { height: auto; transition: transform .2s ease; } .jps-image-button:hover img { transform: translateY(-2px); }`);
   if(widgets.details.length) rules.push(`.jps-details { margin: 10px 0; border: 1px solid ${c.controlBorderColor}; border-radius: ${c.controlRadius}px; overflow: hidden; } .jps-details summary { cursor: pointer; padding: 10px 12px; color: ${c.controlTextColor}; background: ${c.controlColor}; font-weight: 700; } .jps-details p { padding: 10px 12px; margin: 0; color: ${c.bodyColor}; }`);
   if(widgets.experiences.length) rules.push(`.jps-experiences { display: grid; gap: 10px; margin: 12px 0; } .jps-experience { position: relative; display: grid; grid-template-columns: auto 1fr; gap: 4px 11px; padding: 13px 14px; overflow: hidden; color: ${c.bodyColor} !important; background: ${c.controlColor}; border: 1px solid ${c.controlBorderColor}; border-radius: ${c.controlRadius}px; text-decoration: none !important; box-shadow: ${c.controlGlow ? `0 0 ${c.controlGlow}px ${rgba(c.controlBorderColor,45)}` : "none"}; transition: transform .2s ease, border-color .2s ease; } .jps-experience:hover { transform: translateY(-2px); border-color: ${c.linkHoverColor}; } .jps-experience-kind { grid-row: 1 / 4; align-self: start; min-width: 42px; padding: 6px 7px; color: ${c.controlTextColor}; background: ${c.tabActiveColor}; border-radius: ${Math.max(4,Math.round(c.controlRadius/2))}px; font-size: 8px; font-weight: 800; letter-spacing: 1px; text-align: center; text-transform: uppercase; } .jps-experience strong { color: ${c.linkColor}; font-size: 14px; } .jps-experience p { margin: 0; color: ${c.mutedColor}; font-size: 11px; line-height: 1.45; } .jps-experience b { color: ${c.linkHoverColor}; font-size: 9px; letter-spacing: .8px; text-transform: uppercase; }`);
+  widgets.layers.forEach(layer=>{const selector=`.jps-layer-${layer.id}`;rules.push(`${selector}{position:relative!important;left:${layer.x}px!important;top:${layer.y}px!important;width:${layer.width}px!important;max-width:100%!important;padding:${layer.kind==="box"?"14px":"4px"}!important;color:${layer.color}!important;background:${layer.kind==="box"?layer.background:"transparent"}!important;border-radius:${layer.radius}px!important;font-size:${layer.fontSize}px!important;z-index:5!important}${selector} img{display:block!important;width:100%!important;height:auto!important;border-radius:${layer.radius}px!important}`);addMotion(`layer-${layer.id}`,layer.animation,selector)});
   widgets.dolls.forEach((d,i)=>rules.push(`.jps-page-doll-${i+1} { position: fixed; ${d.side}: 10px; bottom: ${d.bottom}px; z-index: 1000; pointer-events: none; } .jps-page-doll-${i+1} img { width: ${d.width}px; max-width: 100%; height: auto; }`));
   rules.push(`@media only screen and (max-width: ${c.breakpoint}px) {
   .profile-page-container { padding-left: ${c.mobilePadding}px !important; padding-right: ${c.mobilePadding}px !important; }
@@ -266,6 +322,7 @@ export function generateCss(c:StudioConfig, widgets:Widgets){
 
 export function generateHtml(w:Widgets){
   const chunks:string[]=[];
+  w.layers.forEach(layer=>{const body=layer.kind==="image"?`<img src="${escapeHtml(layer.url)}" alt="${escapeHtml(layer.name)}">`:layer.kind==="box"?`<strong>${escapeHtml(layer.name)}</strong><p>${escapeHtml(layer.content)}</p>`:escapeHtml(layer.content);chunks.push(`<div class="jps-explorer-layer jps-layer-${layer.id}">${body}</div>`)});
   if(w.experiences.length) chunks.push(`<div class="jps-experiences">\n${w.experiences.map(x=>`  <a href="${escapeHtml(x.url)}" class="jps-experience jps-experience-${x.kind}" target="_blank" rel="noopener noreferrer nofollow"><span class="jps-experience-kind">${escapeHtml(x.kind)}</span><strong>${escapeHtml(x.title)}</strong><p>${escapeHtml(x.description)}</p><b>${escapeHtml(x.label)} →</b></a>`).join("\n")}\n</div>`);
   if(w.links.length) chunks.push(`<div class="jps-links">\n${w.links.map(x=>`  <a href="${escapeHtml(x.url)}" class="jps-link-button" target="_blank" rel="noopener noreferrer nofollow">${escapeHtml(x.label)}</a>`).join("\n")}\n</div>`);
   if(w.imageButtons.length) chunks.push(`<div class="jps-image-buttons">\n${w.imageButtons.map(x=>`  <a href="${escapeHtml(x.url)}" class="jps-image-button" target="_blank" rel="noopener noreferrer nofollow"><img src="${escapeHtml(x.image)}" alt="${escapeHtml(x.alt)}" style="width:${x.width}px"></a>`).join("\n")}\n</div>`);
