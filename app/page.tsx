@@ -1,8 +1,5 @@
-"use client";
-
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
 
 const toolbox = ["C++", "Python", "Luau", "React", "Next.js", "game systems", "level design", "animation", "making tools for my own problems"];
 
@@ -15,19 +12,20 @@ const chaos = [
 
 export default function Home() {
   return (
-    <main className="site-shell min-h-screen overflow-x-hidden bg-[#0b0a0f] text-[#f8f3eb] selection:bg-[#ff8fb3] selection:text-[#220b14]">
+    <main id="main-content" className="site-shell min-h-screen overflow-x-hidden bg-[#0b0a0f] text-[#f8f3eb] selection:bg-[#ff8fb3] selection:text-[#220b14]">
+      <a className="skip-link" href="#stuff">Skip to projects</a>
       <div className="paper-noise pointer-events-none fixed inset-0 z-50" />
 
       <header className="fixed inset-x-0 top-0 z-40 px-4 pt-4 md:px-7">
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-4 rounded-full border border-white/10 bg-[#111016]/85 px-4 shadow-2xl shadow-black/20 backdrop-blur-xl md:px-6">
           <Link href="/" className="group flex items-center gap-2" aria-label="Patchies home">
             <span className="grid size-8 place-items-center rounded-full bg-[#ff8fb3] font-black text-[#1c0c13] transition group-hover:-rotate-12">P</span>
-            <span className="text-sm font-black tracking-[-.02em] text-white">Patchies</span>
+            <span className="hidden text-sm font-black tracking-[-.02em] text-white min-[370px]:inline">Patchies</span>
           </Link>
           <nav className="flex items-center gap-1 text-sm font-bold text-zinc-400" aria-label="Main navigation">
             <a className="hidden rounded-full px-3 py-2 transition hover:bg-white/5 hover:text-white sm:block" href="#stuff">my stuff</a>
-            <Link className="rounded-full px-3 py-2 transition hover:bg-[#b8f4ff]/10 hover:text-[#b8f4ff]" href="/janitor">janitor tools</Link>
-            <a className="rounded-full border border-white/12 bg-white/[.04] px-3 py-2 text-white transition hover:border-[#ff8fb3]/60 hover:bg-[#ff8fb3]/10" href="https://github.com/hiironohana" target="_blank" rel="noreferrer">github ↗</a>
+            <Link className="rounded-full px-2 py-2 transition hover:bg-[#b8f4ff]/10 hover:text-[#b8f4ff] min-[390px]:px-3" href="/janitor"><span className="min-[390px]:hidden">tools</span><span className="hidden min-[390px]:inline">janitor tools</span></Link>
+            <a className="rounded-full border border-white/12 bg-white/[.04] px-2 py-2 text-white transition hover:border-[#ff8fb3]/60 hover:bg-[#ff8fb3]/10 min-[390px]:px-3" href="https://github.com/hiironohana" target="_blank" rel="noreferrer"><span className="min-[390px]:hidden">git ↗</span><span className="hidden min-[390px]:inline">github ↗</span></a>
           </nav>
         </div>
       </header>
@@ -36,7 +34,7 @@ export default function Home() {
         <div className="blob blob-pink absolute -right-40 top-16 size-[520px] rounded-full md:right-[-8vw] md:size-[760px]" />
         <div className="blob blob-blue absolute -left-48 bottom-[-12rem] size-[440px] rounded-full md:size-[620px]" />
         <div className="relative mx-auto grid min-h-[calc(100svh-10rem)] max-w-7xl items-center gap-14 lg:grid-cols-[minmax(0,1.25fr)_minmax(300px,.55fr)]">
-          <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .6 }}>
+          <div className="homepage-reveal">
             <p className="mb-6 w-fit -rotate-2 rounded-full border border-[#ff8fb3]/35 bg-[#ff8fb3]/10 px-4 py-2 text-xs font-black text-[#ffc4d6]">hey, i&apos;m Patchies 👋</p>
             <h1 className="max-w-5xl text-5xl font-black leading-[.9] tracking-[-.065em] text-white sm:text-7xl md:text-8xl xl:text-[7.5rem]">I make weird little things <span className="scribble text-[#ff8fb3]">for the internet.</span></h1>
             <p className="mt-8 max-w-2xl text-lg leading-8 text-zinc-300">Games, tools, chaotic experiments, whatever looked fun at 2 AM. If it moves, makes noise, or saves me from doing something manually, I&apos;m probably building it.</p>
@@ -44,9 +42,9 @@ export default function Home() {
               <a href="#stuff" className="rounded-full bg-[#ff8fb3] px-6 py-3 text-sm font-black text-[#210d15] transition hover:-translate-y-1 hover:bg-[#ffc0d3]">see the stuff ↓</a>
               <Link href="/janitor" className="rounded-full border border-white/15 bg-white/[.04] px-6 py-3 text-sm font-black text-white transition hover:-translate-y-1 hover:border-[#b8f4ff]/50 hover:text-[#b8f4ff]">I&apos;m here for Janitor →</Link>
             </div>
-          </motion.div>
+          </div>
 
-          <motion.aside initial={{ opacity: 0, rotate: 2, x: 24 }} animate={{ opacity: 1, rotate: 1, x: 0 }} transition={{ duration: .65, delay: .08 }} className="doodle-card relative rounded-[2rem] border border-white/12 bg-[#15131b]/90 p-6 shadow-[0_30px_100px_rgba(0,0,0,.45)]">
+          <aside className="homepage-reveal homepage-reveal-delay doodle-card relative rotate-1 rounded-[2rem] border border-white/12 bg-[#15131b]/90 p-6 shadow-[0_30px_100px_rgba(0,0,0,.45)]">
             <span className="absolute -right-3 -top-4 rotate-6 rounded-md bg-[#fff2a8] px-3 py-2 text-xs font-black text-[#262015] shadow-lg">currently cooking</span>
             <p className="text-xs font-black uppercase tracking-[.2em] text-zinc-500">the desk is a mess</p>
             <div className="mt-5 space-y-3">
@@ -62,7 +60,7 @@ export default function Home() {
               </Link>
             </div>
             <p className="mt-5 text-center text-xs text-zinc-500">10+ years making things • still googles basic syntax</p>
-          </motion.aside>
+          </aside>
         </div>
       </section>
 

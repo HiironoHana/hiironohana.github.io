@@ -69,10 +69,12 @@ export type SessionPhase = "menu" | "lobby" | "battle" | "soloGameOver";
 export interface WelcomePayload {
   playerId: PlayerId;
   hostCode: string;
+  worldDims: GameDims;
   players: Record<PlayerId, PlayerCombatState>;
 }
 
 export interface SnapshotPayload {
+  worldDims: GameDims;
   sans: SansFace[];
   bones: Bone[];
   blasters: Blaster[];

@@ -2,10 +2,10 @@ export type LayoutMode = "left" | "right" | "stack";
 export type BorderStyle = "solid" | "dashed" | "dotted" | "double" | "none";
 export type ClipShape = "none" | "circle" | "diamond" | "hexagon";
 export type CharacterSection = "tabs" | "count" | "filters" | "cards";
-export type ProfileSection = "identity" | "about" | "widgets" | "follow";
+export type ProfileSection = "identity" | "about" | "follow";
 export type MotionStyle = "none" | "float" | "pulse" | "glow" | "slide";
-export type ElementOffset = { x: number; y: number };
-export type EditorTarget = { id: string; label: string; selector: string; panel: "canvas" | "layout" | "content" | "profile" | "type" | "cards" | "controls" | "images" | "widgets" | "code" | "support" | "explorer"; kind: "layout" | "element" };
+export type ElementOffset = { x: number; y: number; width?: number; height?: number };
+export type EditorTarget = { id: string; label: string; selector: string; panel: "canvas" | "layout" | "content" | "profile" | "type" | "cards" | "controls" | "images" | "widgets" | "code" | "support" | "explorer" | "safety"; kind: "layout" | "element"; repeated?: boolean };
 
 export type StudioConfig = {
   pageColor: string; pageImage: string; pageSize: "cover" | "contain" | "auto"; pagePosition: string;
@@ -52,7 +52,7 @@ export type PageDoll = { id: number; image: string; alt: string; width: number; 
 export type DetailBlock = { id: number; summary: string; content: string; open: boolean };
 export type ImageAsset = { id: number; name: string; url: string; source: "ella-approved" | "ella" | "external" };
 export type HostedExperience = { id: number; title: string; description: string; url: string; kind: "game" | "tool" | "social"; label: string };
-export type ExplorerItem = { id: number; name: string; kind: "text" | "image" | "box"; content: string; url: string; x: number; y: number; width: number; color: string; background: string; fontSize: number; radius: number; animation: MotionStyle };
+export type ExplorerItem = { id: number; name: string; kind: "text" | "image" | "box" | "button" | "badge" | "divider"; content: string; url: string; x: number; y: number; width: number; height: number; color: string; background: string; fontSize: number; radius: number; animation: MotionStyle; rotation: number; opacity: number; zIndex: number; hidden: boolean; locked: boolean };
 export type Widgets = { links: LinkButton[]; imageButtons: ImageButton[]; dolls: PageDoll[]; details: DetailBlock[]; assets: ImageAsset[]; experiences: HostedExperience[]; layers: ExplorerItem[] };
 export type Diagnostic = { level: "error" | "warning" | "info"; message: string };
 export type PreviewProfileData = { username: string; followers: string; avatarUrl: string };
@@ -65,7 +65,7 @@ export const defaults: StudioConfig = {
   maxWidth: 1740, layout: "left", layoutGap: 30, profileWidth: 540, profileSticky: false,
   profileOffsetX: 0, profileOffsetY: 0, cardsOffsetX: 0, cardsOffsetY: 0,
   elementOffsets: {},
-  characterOrder: ["tabs","count","filters","cards"], profileOrder: ["identity","about","widgets","follow"],
+  characterOrder: ["tabs","count","filters","cards"], profileOrder: ["identity","about","follow"],
   profileColor: "#292a2f", profileGradientTo: "#202126", profileGradient: false, profileImage: "", profilePadding: 12,
   profileRadius: 8, profileBorderWidth: 1, profileBorderStyle: "solid", profileBorderColor: "#696a72",
   profileShadow: 28, profileGlow: 0, profileGlass: 0, profileOpacity: 100, profileMinHeight: 0, profileAlign: "left", profileAnimation: "none",
@@ -106,38 +106,58 @@ export const defaultPreviewBots: PreviewBotData[] = [{
 }];
 
 export const editableTargets: EditorTarget[] = [
-  {id:"page",label:"Page background",selector:".profile-page-background",panel:"canvas",kind:"layout"},
-  {id:"header",label:"Top bar",selector:".profile-top-bar-flex-outer",panel:"controls",kind:"layout"},
-  {id:"profile",label:"Profile panel",selector:".profile-uc-background",panel:"profile",kind:"layout"},
-  {id:"tabs",label:"Character tabs",selector:".profile-tabs-wrapper",panel:"controls",kind:"layout"},
-  {id:"count",label:"Character count",selector:".profile-badge-flex-outer",panel:"layout",kind:"layout"},
+  {id:"page",label:"Page background",selector:".pp-page-background, .profile-page-background",panel:"canvas",kind:"layout"},
+  {id:"page-content",label:"Page content",selector:".profile-page-container",panel:"layout",kind:"layout"},
+  {id:"columns",label:"Profile and character columns",selector:".profile-page-flex",panel:"layout",kind:"layout"},
+  {id:"header",label:"Top bar",selector:".pp-top-bar:not(.pp-top-bar-inner), .profile-top-bar-flex-outer, .pp-top-bar-outer",panel:"controls",kind:"layout"},
+  {id:"profile",label:"Profile panel",selector:".pp-uc-background, .profile-uc-background-flex, .profile-uc-background",panel:"profile",kind:"layout"},
+  {id:"profile-content",label:"Profile content",selector:".profile-info-wrapper-box",panel:"profile",kind:"layout"},
+  {id:"identity-row",label:"Avatar and identity row",selector:".profile-info-hstack",panel:"profile",kind:"layout"},
+  {id:"character-area",label:"Character area",selector:".profile-page-container-flex-box",panel:"layout",kind:"layout"},
+  {id:"tab-system",label:"Complete tab system",selector:".profile-tabs-chakra-tabs",panel:"controls",kind:"layout"},
+  {id:"tabs",label:"Character tabs",selector:".pp-tabs-wrapper, .profile-tabs-wrapper",panel:"controls",kind:"layout"},
+  {id:"results-row",label:"Count and search row",selector:".character-list-pagination-flex",panel:"layout",kind:"layout"},
+  {id:"count",label:"Character count",selector:".pp-pg-total, .profile-badge-flex-outer",panel:"layout",kind:"layout"},
   {id:"filters",label:"Search and filters",selector:".profile-filters-flex-outer",panel:"controls",kind:"layout"},
   {id:"cards",label:"Bot-card area",selector:".pp-cc-list-container",panel:"cards",kind:"layout"},
-  {id:"footer",label:"Bottom bar",selector:".pp-footer",panel:"controls",kind:"layout"},
-  {id:"logo",label:"Janitor logo",selector:".profile-top-bar-logo-box",panel:"controls",kind:"element"},
+  {id:"pagination",label:"Character pagination",selector:".characters-list-container-flex > .profile-pagination-flex-outer",panel:"layout",kind:"layout"},
+  {id:"footer",label:"Bottom bar",selector:".pp-mnb-wrapper, .pp-footer, footer",panel:"controls",kind:"layout"},
+  {id:"header-left",label:"Top-bar left group",selector:".pp-top-bar-left",panel:"controls",kind:"element"},
+  {id:"logo",label:"Janitor logo",selector:".pp-top-bar-logo, .profile-top-bar-logo-box",panel:"controls",kind:"element"},
+  {id:"logo-name",label:"Janitor logo word",selector:".profile-top-bar-logo-name",panel:"controls",kind:"element"},
+  {id:"logo-beta",label:"Janitor beta label",selector:".profile-top-bar-logo-sub-name",panel:"controls",kind:"element"},
   {id:"top-search",label:"Top search bar",selector:".profile-top-bar-search-wrapper",panel:"controls",kind:"element"},
   {id:"create",label:"Create Character button",selector:".profile-top-bar-create-char",panel:"controls",kind:"element"},
-  {id:"top-icons",label:"Top-bar icons",selector:".pp-top-bar-right .top-icon",panel:"controls",kind:"element"},
+  {id:"header-right",label:"Top-bar right group",selector:".pp-top-bar-right",panel:"controls",kind:"element"},
+  {id:"top-icons",label:"All top-bar icons",selector:"[aria-label=\"Notifications\"], .pp-top-bar-app-menu, .pp-top-bar-right .top-icon",panel:"controls",kind:"element",repeated:true},
+  {id:"avatar-box",label:"Avatar container",selector:".profile-avatar-container",panel:"profile",kind:"element"},
   {id:"avatar",label:"Profile avatar",selector:".profile-avatar",panel:"profile",kind:"element"},
+  {id:"identity",label:"Profile identity",selector:".profile-info-stack-inner",panel:"profile",kind:"element"},
   {id:"title",label:"Profile name",selector:".profile-title-heading",panel:"type",kind:"element"},
   {id:"followers",label:"Follower count",selector:".profile-followers-count",panel:"type",kind:"element"},
   {id:"member",label:"Member line",selector:".profile-member-since-box",panel:"type",kind:"element"},
   {id:"about",label:"About Me",selector:".profile-about-me",panel:"widgets",kind:"element"},
-  {id:"follow",label:"Follow button",selector:".profile-uc-follow-button",panel:"controls",kind:"element"},
+  {id:"follow",label:"Follow / options row",selector:".profile-uc-follow-flex",panel:"controls",kind:"element"},
+  {id:"tab-button",label:"All character-tab buttons",selector:".profile-tabs-button",panel:"controls",kind:"element",repeated:true},
+  {id:"tab-indicator",label:"Character tab indicator",selector:".profile-tabs-indicator",panel:"controls",kind:"element"},
   {id:"character-search",label:"Character search box",selector:".profile-character-search-input-group",panel:"controls",kind:"element"},
+  {id:"character-search-input",label:"Character search input",selector:".profile-character-search-input",panel:"controls",kind:"element"},
   {id:"filter-button",label:"Filter button",selector:".profile-filter-button",panel:"controls",kind:"element"},
-  {id:"sort",label:"Sort button",selector:".sort-control",panel:"controls",kind:"element"},
-  {id:"card",label:"Bot card",selector:".profile-character-card-wrapper",panel:"cards",kind:"element"},
-  {id:"card-name",label:"Bot name",selector:".profile-character-card-name-box",panel:"cards",kind:"element"},
-  {id:"card-art",label:"Bot artwork",selector:".profile-character-card-avatar-image",panel:"cards",kind:"element"},
-  {id:"ribbon",label:"Chat ribbon",selector:".profile-character-card-ribbon",panel:"cards",kind:"element"},
-  {id:"creator",label:"Creator name",selector:".profile-character-card-creator-name-box",panel:"cards",kind:"element"},
-  {id:"description",label:"Bot description",selector:".profile-character-card-description-box",panel:"cards",kind:"element"},
-  {id:"star",label:"Card star",selector:".profile-character-card-star-line",panel:"cards",kind:"element"},
-  {id:"tags",label:"Bot tags",selector:".profile-character-card-tags",panel:"cards",kind:"element"},
-  {id:"tokens",label:"Token count",selector:".profile-character-card-tokens-count",panel:"cards",kind:"element"},
-  {id:"footer-copy",label:"Footer label",selector:".pp-footer > span:first-child",panel:"controls",kind:"element"},
-  {id:"footer-links",label:"Footer links",selector:".footer-links",panel:"controls",kind:"element"},
+  {id:"sort",label:"Sort control",selector:".profile-filters-flex-inner-onorderchanged",panel:"controls",kind:"element"},
+  {id:"card",label:"All bot cards",selector:".pp-cc-wrapper, .profile-character-card-wrapper",panel:"cards",kind:"element",repeated:true},
+  {id:"card-content",label:"All bot-card contents",selector:".profile-character-card-stack",panel:"cards",kind:"element",repeated:true},
+  {id:"card-name",label:"All bot names",selector:".profile-character-card-name-box",panel:"cards",kind:"element",repeated:true},
+  {id:"card-art",label:"All bot artwork",selector:".profile-character-card-avatar-image",panel:"cards",kind:"element",repeated:true},
+  {id:"ribbon",label:"All chat-ribbon containers",selector:".pp-cc-ribbon, .profile-character-card-ribbon",panel:"cards",kind:"element",repeated:true},
+  {id:"ribbon-content",label:"All chat-ribbon labels",selector:".pp-cc-ribbon-wrap, .profile-character-card-ribbon-wrap, .profile-character-card-ribbon > .pp-cc-chats-count",panel:"cards",kind:"element",repeated:true},
+  {id:"creator",label:"All creator names",selector:".profile-character-card-creator-name-box",panel:"cards",kind:"element",repeated:true},
+  {id:"description",label:"All bot descriptions",selector:".profile-character-card-description-box",panel:"cards",kind:"element",repeated:true},
+  {id:"star",label:"All card stars",selector:".profile-character-card-star-line",panel:"cards",kind:"element",repeated:true},
+  {id:"tags",label:"All bot-tag rows",selector:".profile-character-card-tags",panel:"cards",kind:"element",repeated:true},
+  {id:"tag",label:"All individual bot tags",selector:".profile-character-card-tags-item",panel:"cards",kind:"element",repeated:true},
+  {id:"tokens",label:"All token counts",selector:".profile-character-card-tokens-count",panel:"cards",kind:"element",repeated:true},
+  {id:"footer-copy",label:"Bottom-bar content",selector:".pp-mnb-container, .pp-footer > span:first-child, footer > :first-child",panel:"controls",kind:"element"},
+  {id:"footer-links",label:"Footer links",selector:".footer-links, footer nav, footer > :last-child",panel:"controls",kind:"element"},
 ];
 
 export const presets: Record<string, Partial<StudioConfig>> = {
@@ -147,7 +167,100 @@ export const presets: Record<string, Partial<StudioConfig>> = {
   Frost: { pageColor:"#0d141c", profileColor:"#172637", profileGradientTo:"#0f1924", profileGradient:true, cardColor:"#172232", cardGradientTo:"#0d1621", cardGradient:true, titleColor:"#f2fbff", bodyColor:"#e8f6ff", mutedColor:"#9eb4c6", linkColor:"#62dbff", linkHoverColor:"#ffffff", profileBorderColor:"#315a72", cardBorderColor:"#315a72", headerColor:"#122333", headerGradientTo:"#0a1119", headerGradient:true, tabTextColor:"#62dbff", tabActiveColor:"#b7f2ff", controlColor:"#112231", controlBorderColor:"#315a72", ribbonColor:"#178bb5", tagColor:"#173044", tagBorderColor:"#39718e", avatarGlow:15, profileGlass:10 },
   Cyber: { pageColor:"#05060a", profileColor:"#0b1020", profileGradientTo:"#120b22", profileGradient:true, cardColor:"#090e1a", cardGradientTo:"#180d27", cardGradient:true, titleColor:"#e9fbff", bodyColor:"#d8f8ff", mutedColor:"#8293ad", linkColor:"#00f0ff", linkHoverColor:"#f500ff", profileBorderColor:"#00b8c7", cardBorderColor:"#9e22d8", headerColor:"#080b17", headerGradientTo:"#180925", headerGradient:true, tabTextColor:"#00f0ff", tabActiveColor:"#f500ff", controlColor:"#0a1020", controlBorderColor:"#7540a5", ribbonColor:"#d000ff", tagColor:"#11172b", tagBorderColor:"#00a7b4", titleGlow:22, profileGlow:18, cardHoverGlow:32, avatarClip:"hexagon" },
   Paper: { pageColor:"#e9e0d0", profileColor:"#fff8e9", profileGradientTo:"#ede1cb", profileGradient:true, cardColor:"#f8edda", cardGradientTo:"#e8d8bd", cardGradient:true, titleColor:"#2e261e", bodyColor:"#302820", mutedColor:"#766757", linkColor:"#a43f35", linkHoverColor:"#6f251e", profileBorderColor:"#aa9274", cardBorderColor:"#aa9274", headerColor:"#3b3027", headerGradientTo:"#211a15", headerGradient:true, headerTextColor:"#fff8ec", tabColor:"#3b3027", tabTextColor:"#f4d3a4", tabActiveColor:"#ffffff", controlColor:"#fff8e9", controlTextColor:"#2e261e", controlBorderColor:"#aa9274", ribbonColor:"#8e392e", tagColor:"#e7d6ba", tagTextColor:"#382d23", tagBorderColor:"#aa9274", profileRadius:2, cardRadius:2, controlRadius:2, titleFont:"Georgia", bodyFont:"Georgia" },
+  "Midnight Glass": { pageColor:"#070a12", profileColor:"#101729", profileGradientTo:"#090c16", profileGradient:true, profileOpacity:86, profileGlass:18, cardColor:"#0d1322", cardGradientTo:"#11182b", cardGradient:true, cardOpacity:90, titleColor:"#f7f9ff", bodyColor:"#e8edff", mutedColor:"#94a0bc", linkColor:"#8cb8ff", linkHoverColor:"#ffffff", profileBorderColor:"#5476a5", cardBorderColor:"#3b5479", headerColor:"#090e1c", headerGradientTo:"#151b2c", headerGradient:true, headerBlur:16, tabColor:"#0c1322", tabTextColor:"#8cb8ff", tabActiveColor:"#d7e5ff", controlColor:"#111a2d", controlBorderColor:"#4f6d99", profileRadius:24, cardRadius:18, controlRadius:12, profileGlow:14, cardHoverGlow:25 },
+  "CRT Arcade": { pageColor:"#030805", profileColor:"#07120b", profileGradientTo:"#030805", profileGradient:true, cardColor:"#061109", cardGradientTo:"#020704", cardGradient:true, titleColor:"#d9ffb8", bodyColor:"#c8ffaf", mutedColor:"#70a66b", linkColor:"#79ff76", linkHoverColor:"#f6ff8c", profileBorderColor:"#2cda58", cardBorderColor:"#2cda58", headerColor:"#041108", headerGradientTo:"#010503", headerGradient:true, headerLogoColor:"#79ff76", tabColor:"#020a04", tabTextColor:"#79ff76", tabActiveColor:"#f6ff8c", controlColor:"#07140a", controlTextColor:"#d9ffb8", controlBorderColor:"#2cda58", ribbonColor:"#1a9f43", tagColor:"#09210f", tagBorderColor:"#2cda58", titleFont:"Courier New", bodyFont:"Courier New", titleGlow:20, bodyGlow:8, tabGlow:14, cardHoverGlow:22, cardRadius:0, profileRadius:0, controlRadius:0 },
+  "Soft Floral": { pageColor:"#f5e8ef", profileColor:"#fff7fb", profileGradientTo:"#efdce7", profileGradient:true, cardColor:"#fff9fc", cardGradientTo:"#eddce7", cardGradient:true, titleColor:"#5b3048", bodyColor:"#513947", mutedColor:"#947286", linkColor:"#bd4d82", linkHoverColor:"#77304f", profileBorderColor:"#d69ab8", cardBorderColor:"#d69ab8", headerColor:"#723e5a", headerGradientTo:"#4e2a3e", headerGradient:true, headerTextColor:"#fff7fb", headerLogoColor:"#ffd5e8", tabColor:"#fff7fb", tabTextColor:"#a83f70", tabActiveColor:"#d75991", controlColor:"#fff7fb", controlTextColor:"#5b3048", controlBorderColor:"#d69ab8", ribbonColor:"#c94e82", tagColor:"#f2d9e6", tagTextColor:"#62364c", tagBorderColor:"#d69ab8", avatarRadius:50, profileRadius:30, cardRadius:24, controlRadius:18, cardHoverLift:8 },
+  "Dark Academia": { pageColor:"#15110d", profileColor:"#2a2119", profileGradientTo:"#15100c", profileGradient:true, cardColor:"#211a14", cardGradientTo:"#100c09", cardGradient:true, titleColor:"#f0dfbd", bodyColor:"#ddcbaa", mutedColor:"#9f8b6f", linkColor:"#d3a861", linkHoverColor:"#fff1cb", profileBorderColor:"#765c39", cardBorderColor:"#765c39", headerColor:"#22180f", headerGradientTo:"#0f0b08", headerGradient:true, headerLogoColor:"#d3a861", tabColor:"#1c140e", tabTextColor:"#d3a861", tabActiveColor:"#fff1cb", controlColor:"#2a2119", controlTextColor:"#f0dfbd", controlBorderColor:"#765c39", ribbonColor:"#765021", tagColor:"#352719", tagTextColor:"#ead8b3", tagBorderColor:"#765c39", titleFont:"Georgia", bodyFont:"Georgia", profileRadius:4, cardRadius:4, controlRadius:2, profileBorderStyle:"double", cardBorderStyle:"double", profileBorderWidth:3 },
+  "Neon Metro": { pageColor:"#06060d", profileColor:"#121020", profileGradientTo:"#090711", profileGradient:true, cardColor:"#100d1b", cardGradientTo:"#07060c", cardGradient:true, titleColor:"#ffffff", bodyColor:"#e9e4ff", mutedColor:"#9d91b8", linkColor:"#ff4fa3", linkHoverColor:"#56f3ff", profileBorderColor:"#ff4fa3", cardBorderColor:"#754cff", headerColor:"#0a0813", headerGradientTo:"#191027", headerGradient:true, headerLogoColor:"#ff4fa3", tabColor:"#0a0813", tabTextColor:"#56f3ff", tabActiveColor:"#ff4fa3", controlColor:"#130f21", controlBorderColor:"#754cff", ribbonColor:"#ff2b8f", tagColor:"#19112a", tagBorderColor:"#754cff", titleGlow:18, profileGlow:20, tabGlow:18, cardHoverGlow:38, avatarClip:"diamond", headerAnimation:"glow", tabAnimation:"pulse" },
+  "Reading Room": { pageColor:"#f1eee7", profileColor:"#fffdf7", profileGradientTo:"#eae4d8", profileGradient:true, cardColor:"#fffdf7", cardGradientTo:"#ebe5da", cardGradient:true, titleColor:"#25211b", bodyColor:"#322e27", mutedColor:"#766f63", linkColor:"#375f75", linkHoverColor:"#182f3b", profileBorderColor:"#b6aa96", cardBorderColor:"#b6aa96", headerColor:"#242a2c", headerGradientTo:"#15191b", headerGradient:true, headerTextColor:"#f8f4eb", headerLogoColor:"#c9e6f2", tabColor:"#fffdf7", tabTextColor:"#375f75", tabActiveColor:"#182f3b", controlColor:"#f8f4eb", controlTextColor:"#25211b", controlBorderColor:"#b6aa96", ribbonColor:"#375f75", tagColor:"#e9e2d6", tagTextColor:"#322e27", tagBorderColor:"#b6aa96", bodyFont:"Georgia", descriptionAlign:"left", bodyLineHeight:175, profileWidth:610, cardWidth:230, cardMinHeight:470, profileRadius:6, cardRadius:6, controlRadius:4 },
+  "Minimal Studio": { pageColor:"#ededed", profileColor:"#ffffff", profileGradient:false, cardColor:"#ffffff", cardGradient:false, titleColor:"#111111", bodyColor:"#222222", mutedColor:"#6d6d6d", linkColor:"#2457ff", linkHoverColor:"#111111", profileBorderColor:"#bdbdbd", cardBorderColor:"#c8c8c8", headerColor:"#111111", headerGradient:false, headerTextColor:"#ffffff", headerLogoColor:"#ffffff", tabColor:"#ffffff", tabTextColor:"#111111", tabActiveColor:"#2457ff", controlColor:"#ffffff", controlTextColor:"#111111", controlBorderColor:"#bdbdbd", ribbonColor:"#2457ff", tagColor:"#f2f2f2", tagTextColor:"#222222", tagBorderColor:"#c8c8c8", profileRadius:0, cardRadius:0, controlRadius:0, profileShadow:8, cardShadow:8, cardHoverGlow:0, titleFont:"Arial", bodyFont:"Arial" },
 };
+
+export type StudioProject = {
+  version: 10;
+  config: StudioConfig;
+  widgets: Widgets;
+  previewProfile: PreviewProfileData;
+  previewBots: PreviewBotData[];
+  rawCss: string;
+  manual: boolean;
+  rawHtml: string;
+  manualHtml: boolean;
+};
+
+const finite = (value:unknown, fallback:number) => typeof value === "number" && Number.isFinite(value) ? value : fallback;
+const oneOf = <T extends string>(value:unknown, allowed:readonly T[], fallback:T):T => typeof value === "string" && allowed.includes(value as T) ? value as T : fallback;
+const normalizeOrder = <T extends string>(value:unknown, canonical:readonly T[]) => {
+  const incoming = Array.isArray(value) ? value.filter((item):item is T => typeof item === "string" && canonical.includes(item as T)) : [];
+  return [...new Set([...incoming,...canonical])] as T[];
+};
+
+export function migrateProject(input:unknown):StudioProject {
+  const data = input && typeof input === "object" ? input as Record<string,unknown> : {};
+  const incomingVersion = finite(data.version, 0);
+  if(incomingVersion > 10) throw new Error("This project was made with a newer version of Patchies Studio.");
+  const rawConfig = data.config && typeof data.config === "object" ? data.config as Partial<StudioConfig> : {};
+  const frames:StudioConfig["elementOffsets"] = {};
+  if(rawConfig.elementOffsets && typeof rawConfig.elementOffsets === "object") Object.entries(rawConfig.elementOffsets).forEach(([id,value])=>{
+    if(!value || typeof value !== "object") return;
+    const frame=value as ElementOffset;
+    frames[id]={x:finite(frame.x,0),y:finite(frame.y,0),...(Number.isFinite(frame.width)?{width:Math.max(16,Number(frame.width))}:{}),...(Number.isFinite(frame.height)?{height:Math.max(12,Number(frame.height))}:{})};
+  });
+  if(!frames.profile && (finite(rawConfig.profileOffsetX,0)||finite(rawConfig.profileOffsetY,0))) frames.profile={x:finite(rawConfig.profileOffsetX,0),y:finite(rawConfig.profileOffsetY,0)};
+  if(!frames.cards && (finite(rawConfig.cardsOffsetX,0)||finite(rawConfig.cardsOffsetY,0))) frames.cards={x:finite(rawConfig.cardsOffsetX,0),y:finite(rawConfig.cardsOffsetY,0)};
+  const normalizedConfig={...defaults} as StudioConfig;
+  const normalizedRecord=normalizedConfig as unknown as Record<string,unknown>, rawRecord=rawConfig as Record<string,unknown>;
+  Object.entries(defaults as unknown as Record<string,unknown>).forEach(([key,fallback])=>{const candidate=rawRecord[key];if(typeof fallback==="number")normalizedRecord[key]=finite(candidate,fallback);else if(typeof fallback==="string")normalizedRecord[key]=typeof candidate==="string"?candidate:fallback;else if(typeof fallback==="boolean")normalizedRecord[key]=typeof candidate==="boolean"?candidate:fallback});
+  const config:StudioConfig={
+    ...normalizedConfig,
+    pageSize:oneOf(rawConfig.pageSize,["cover","contain","auto"] as const,defaults.pageSize),
+    pageRepeat:oneOf(rawConfig.pageRepeat,["no-repeat","repeat","repeat-x","repeat-y"] as const,defaults.pageRepeat),
+    pageAttachment:oneOf(rawConfig.pageAttachment,["scroll","fixed"] as const,defaults.pageAttachment),
+    layout:oneOf(rawConfig.layout,["left","right","stack"] as const,defaults.layout),
+    profileBorderStyle:oneOf(rawConfig.profileBorderStyle,["solid","dashed","dotted","double","none"] as const,defaults.profileBorderStyle),
+    profileAlign:oneOf(rawConfig.profileAlign,["left","center","right"] as const,defaults.profileAlign),
+    profileAnimation:oneOf(rawConfig.profileAnimation,["none","float","breathe"] as const,defaults.profileAnimation),
+    avatarClip:oneOf(rawConfig.avatarClip,["none","circle","diamond","hexagon"] as const,defaults.avatarClip),
+    titleTransform:oneOf(rawConfig.titleTransform,["none","uppercase","lowercase"] as const,defaults.titleTransform),
+    cardBorderStyle:oneOf(rawConfig.cardBorderStyle,["solid","dashed","dotted","double","none"] as const,defaults.cardBorderStyle),
+    cardJustify:oneOf(rawConfig.cardJustify,["flex-start","center","space-between"] as const,defaults.cardJustify),
+    cardAnimation:oneOf(rawConfig.cardAnimation,["none","fade","rise"] as const,defaults.cardAnimation),
+    botImageClip:oneOf(rawConfig.botImageClip,["none","circle","diamond","hexagon"] as const,defaults.botImageClip),
+    descriptionAlign:oneOf(rawConfig.descriptionAlign,["left","center","right"] as const,defaults.descriptionAlign),
+    headerAnimation:oneOf(rawConfig.headerAnimation,["none","float","pulse","glow","slide"] as const,defaults.headerAnimation),
+    tabAnimation:oneOf(rawConfig.tabAnimation,["none","float","pulse","glow","slide"] as const,defaults.tabAnimation),
+    searchAnimation:oneOf(rawConfig.searchAnimation,["none","float","pulse","glow","slide"] as const,defaults.searchAnimation),
+    footerAlign:oneOf(rawConfig.footerAlign,["left","center","space-between"] as const,defaults.footerAlign),
+    footerAnimation:oneOf(rawConfig.footerAnimation,["none","float","pulse","glow","slide"] as const,defaults.footerAnimation),
+    pageImage:"",overlayImage:"",profileImage:"",cardImage:"",
+    profileOffsetX:0,profileOffsetY:0,cardsOffsetX:0,cardsOffsetY:0,
+    elementOffsets:frames,
+    characterOrder:normalizeOrder(rawConfig.characterOrder,["tabs","count","filters","cards"] as const),
+    profileOrder:normalizeOrder(rawConfig.profileOrder,["identity","about","follow"] as const),
+  };
+  const rawWidgets=data.widgets && typeof data.widgets === "object" ? data.widgets as Partial<Widgets> : {};
+  const records=(value:unknown)=>Array.isArray(value)?value.map(item=>item&&typeof item==="object"?item as Record<string,unknown>:{}):[];
+  const string=(value:unknown,fallback="")=>typeof value==="string"?value:fallback;
+  const links:LinkButton[]=records(rawWidgets.links).map((item,index)=>({id:Math.round(finite(item.id,index+1)),label:string(item.label,"Link"),url:string(item.url,"https://")}));
+  const imageButtons:ImageButton[]=records(rawWidgets.imageButtons).map((item,index)=>({id:Math.round(finite(item.id,index+1)),image:string(item.image),url:string(item.url,"https://"),alt:string(item.alt,"Image button"),width:Math.max(1,finite(item.width,120))}));
+  const dolls:PageDoll[]=records(rawWidgets.dolls).map((item,index)=>({id:Math.round(finite(item.id,index+1)),image:string(item.image),alt:string(item.alt,"Page doll"),width:Math.max(1,finite(item.width,160)),side:item.side==="left"?"left":"right",bottom:finite(item.bottom,20),hideMobile:typeof item.hideMobile==="boolean"?item.hideMobile:true}));
+  const details:DetailBlock[]=records(rawWidgets.details).map((item,index)=>({id:Math.round(finite(item.id,index+1)),summary:string(item.summary,"Read more"),content:string(item.content),open:Boolean(item.open)}));
+  const assets:ImageAsset[]=records(rawWidgets.assets).map((item,index)=>({id:Math.round(finite(item.id,index+1)),name:string(item.name,`Image ${index+1}`),url:string(item.url),source:item.source==="ella-approved"||item.source==="ella"?item.source:"external"}));
+  const experiences:HostedExperience[]=records(rawWidgets.experiences).map((item,index)=>({id:Math.round(finite(item.id,index+1)),title:string(item.title,"Experience"),description:string(item.description),url:string(item.url,"https://"),kind:item.kind==="tool"||item.kind==="social"?item.kind:"game",label:string(item.label,"Launch")}));
+  const usedIds=new Set<number>();
+  const layers=(Array.isArray(rawWidgets.layers)?rawWidgets.layers:[]).map((value,index)=>{
+    const layer=value && typeof value === "object" ? value as Partial<ExplorerItem> : {};
+    let id=Math.max(1,Math.round(finite(layer.id,index+1)));
+    while(usedIds.has(id))id+=1;usedIds.add(id);
+    const allowedKinds:ExplorerItem["kind"][]=["text","image","box","button","badge","divider"];
+    const kind=allowedKinds.includes(layer.kind as ExplorerItem["kind"])?layer.kind as ExplorerItem["kind"]:"text";
+    return {id,name:typeof layer.name==="string"?layer.name:`Layer ${id}`,kind,content:typeof layer.content==="string"?layer.content:"",url:typeof layer.url==="string"?layer.url:"",x:finite(layer.x,0),y:finite(layer.y,0),width:Math.max(16,finite(layer.width,kind==="divider"?240:220)),height:Math.max(0,finite(layer.height,0)),color:typeof layer.color==="string"?layer.color:"#ffffff",background:typeof layer.background==="string"?layer.background:"#251d30",fontSize:Math.max(6,finite(layer.fontSize,16)),radius:Math.max(0,finite(layer.radius,8)),animation:["none","float","pulse","glow","slide"].includes(String(layer.animation))?layer.animation as MotionStyle:"none",rotation:finite(layer.rotation,0),opacity:Math.min(100,Math.max(0,finite(layer.opacity,100))),zIndex:Math.round(finite(layer.zIndex,5)),hidden:Boolean(layer.hidden),locked:Boolean(layer.locked)};
+  });
+  const widgets:Widgets={...emptyWidgets,links,imageButtons,dolls,details,assets,experiences,layers};
+  const rawProfile=data.previewProfile && typeof data.previewProfile === "object" ? data.previewProfile as Partial<PreviewProfileData> : {};
+  const bots=(Array.isArray(data.previewBots)?data.previewBots:defaultPreviewBots).map((bot,index)=>{const value=bot && typeof bot==="object"?bot as Partial<PreviewBotData>:{};return {id:Math.round(finite(value.id,index+1)),name:typeof value.name==="string"?value.name:"Test Bot",description:typeof value.description==="string"?value.description:"",chats:typeof value.chats==="string"?value.chats:"0",tokens:typeof value.tokens==="string"?value.tokens:"0 tokens",image:typeof value.image==="string"?value.image:"",tags:Array.isArray(value.tags)?value.tags.filter((tag):tag is string=>typeof tag==="string"):[]}});
+  return {version:10,config,widgets,previewProfile:{username:string(rawProfile.username,defaultPreviewProfile.username),followers:string(rawProfile.followers,defaultPreviewProfile.followers),avatarUrl:string(rawProfile.avatarUrl,defaultPreviewProfile.avatarUrl)},previewBots:bots,rawCss:typeof data.rawCss==="string"?data.rawCss:"",manual:Boolean(data.manual),rawHtml:typeof data.rawHtml==="string"?data.rawHtml:"",manualHtml:Boolean(data.manualHtml)};
+}
 
 const safeUrl = (value: string) => value.replace(/["'\\\n\r<>]/g, "");
 const safeText = (value: string) => value.replace(/["\\\n\r]/g, "");
@@ -158,9 +271,7 @@ const rgba = (hex: string, percent: number) => {
   const n = Number.parseInt(value, 16);
   return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${(percent / 100).toFixed(2)})`;
 };
-const background = (solid:string, to:string, gradient:boolean, image:string) => image
-  ? `linear-gradient(${rgba(solid,82)}, ${rgba(to,90)}), url("${safeUrl(image)}")`
-  : gradient ? `linear-gradient(145deg, ${solid}, ${to})` : solid;
+const background = (solid:string, to:string, gradient:boolean) => gradient ? `linear-gradient(145deg, ${solid}, ${to})` : solid;
 const clip = (shape: ClipShape) => ({ none:"none", circle:"circle(50%)", diamond:"polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)", hexagon:"polygon(25% 6%, 75% 6%, 100% 50%, 75% 94%, 25% 94%, 0% 50%)" }[shape]);
 const shadow = (depth:number, glow:number, color:string) => `0 ${Math.max(2,Math.round(depth/3))}px ${depth}px rgba(0,0,0,0.58)${glow ? `, 0 0 ${glow}px ${rgba(color,45)}` : ""}`;
 
@@ -186,22 +297,67 @@ export function analyzeImageUrl(input:string):ImageAnalysis {
   return {status:imageFile?"good":"warning",label:imageFile?"Direct image":"Check direct link",message:imageFile?"Public HTTPS image URL detected.":"The URL does not end in a common image extension; previews or Janitor may reject the webpage link.",normalized,source:"external"};
 }
 
+function generateElementFrameRules(c:StudioConfig){
+  const desktop:string[]=[],mobile:string[]=[];
+  Object.entries(c.elementOffsets||{}).forEach(([storageId,frame])=>{
+    const mobileFrame=storageId.startsWith("mobile:"),id=mobileFrame?storageId.slice(7):storageId,target=editableTargets.find(item=>item.id===id);
+    if(!target)return;
+    const hasWidth=Number.isFinite(frame.width),hasHeight=Number.isFinite(frame.height);
+    if(!frame.x&&!frame.y&&!hasWidth&&!hasHeight)return;
+    const preservesPosition=["page","header","profile","footer","tab-indicator","star"].includes(id);
+    const positioned=preservesPosition?`translate:${Math.round(frame.x)}px ${Math.round(frame.y)}px!important;`:`position:relative!important;left:${Math.round(frame.x)}px!important;top:${Math.round(frame.y)}px!important;`;
+    const width=hasWidth?`width:${Math.max(16,Math.round(frame.width!))}px!important;min-width:0!important;max-width:none!important;flex-basis:auto!important;`:"";
+    const height=hasHeight?`height:${Math.max(12,Math.round(frame.height!))}px!important;min-height:0!important;max-height:none!important;`:"";
+    const rule=`${target.selector}{${positioned}${width}${height}}`;
+    if(mobileFrame){mobile.push(rule);return}
+    desktop.push(rule);
+  });
+  const scoped:string[]=[];
+  if(desktop.length)scoped.push(`@media only screen and (min-width:${c.breakpoint+1}px){${desktop.join("")}}`);
+  if(mobile.length)scoped.push(`@media only screen and (max-width:${c.breakpoint}px){${mobile.join("")}}`);
+  return scoped;
+}
+
+function generateCharacterStructureRules(c:StudioConfig){
+  const order=Object.fromEntries(c.characterOrder.map((name,index)=>[name,index+1])) as Record<CharacterSection,number>;
+  const paginationOrder=Math.max(...Object.values(order))+1;
+  const sharedResultsRow=Math.abs(order.count-order.filters)===1;
+  const flattened=[
+    ".pp-tabs-panels", ".profile-tabs-panels",
+    ".profile-tab-panel:not([hidden]):not([aria-hidden=\"true\"])",
+    ".profile-tab-panel:not([hidden]):not([aria-hidden=\"true\"]) > :only-child",
+    ".characters-list-container-flex", ".character-list-pagination-flex > :only-child",
+    ".character-list-pagination-box", ".character-list-pagination-box > .profile-pagination-flex-outer", ".css-zdpt2t",
+  ];
+  if(!sharedResultsRow)flattened.push(".character-list-pagination-flex");
+  const resultsRow=sharedResultsRow?`.character-list-pagination-flex { display: flex !important; justify-content: space-between !important; gap: 12px !important; flex-wrap: wrap !important; order: ${Math.min(order.count,order.filters)} !important; }`:"";
+  return `.profile-tabs-chakra-tabs { display: flex !important; flex-direction: column !important; }
+${flattened.join(", ")} { display: contents !important; }
+${resultsRow}
+.profile-tab-panel[hidden], .profile-tab-panel[aria-hidden="true"], [role="tabpanel"][hidden] { display: none !important; }
+.pp-tabs-wrapper, .profile-tabs-wrapper { order: ${order.tabs} !important; }
+.pp-pg-total, .profile-badge-flex-outer { order: ${order.count} !important; }
+.profile-filters-flex-outer { order: ${order.filters} !important; }
+.pp-cc-list-container, .card-row { order: ${order.cards} !important; display: flex !important; flex-wrap: wrap !important; gap: ${c.cardGap}px !important; justify-content: ${c.cardJustify} !important; }
+.characters-list-container-flex > .profile-pagination-flex-outer { order: ${paginationOrder} !important; }`;
+}
+
 export function generateCss(c:StudioConfig, widgets:Widgets){
   const dir = c.layout === "right" ? "row-reverse" : c.layout === "stack" ? "column" : "row";
-  const characterOrder = Object.fromEntries(c.characterOrder.map((name,index)=>[name,index+1]));
   const profileOrder = Object.fromEntries(c.profileOrder.map((name,index)=>[name,index+1]));
-  const profileBackground = background(c.profileColor,c.profileGradientTo,c.profileGradient,c.profileImage);
-  const cardBackground = background(c.cardColor,c.cardGradientTo,c.cardGradient,c.cardImage);
+  const profileBackground = background(c.profileColor,c.profileGradientTo,c.profileGradient);
+  const cardBackground = background(c.cardColor,c.cardGradientTo,c.cardGradient);
   const pageFilter = `blur(${c.pageBlur}px) brightness(${c.pageBrightness}%) contrast(${c.pageContrast}%) saturate(${c.pageSaturate}%)`;
   const rules:string[] = [];
-  const addMotion=(name:string,motion:MotionStyle,selector:string)=>{
+  const addMotion=(name:string,motion:MotionStyle,selector:string,baseTransform="",endOpacity=1)=>{
     if(motion==="none")return;
-    const frames=motion==="float"?"0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}":motion==="pulse"?"0%,100%{transform:scale(1)}50%{transform:scale(1.025)}":motion==="glow"?"0%,100%{filter:drop-shadow(0 0 0 transparent)}50%{filter:drop-shadow(0 0 10px currentColor)}":"0%{opacity:0;transform:translateX(-18px)}100%{opacity:1;transform:translateX(0)}";
-    rules.push(`@keyframes jps-${name}-${motion}{${frames}} ${selector}{animation:jps-${name}-${motion} ${motion==="slide"?".5s":"3.2s"} ease-in-out ${motion==="slide"?"1":"infinite"}!important}`);
+    const base=baseTransform?`${baseTransform} `:"";
+    const frames=motion==="float"?`0%,100%{transform:${base}translateY(0)}50%{transform:${base}translateY(-6px)}`:motion==="pulse"?`0%,100%{transform:${base}scale(1)}50%{transform:${base}scale(1.025)}`:motion==="glow"?"0%,100%{filter:drop-shadow(0 0 0 transparent)}50%{filter:drop-shadow(0 0 10px currentColor)}":`0%{opacity:0;transform:${base}translateX(-18px)}100%{opacity:${endOpacity};transform:${base}translateX(0)}`;
+    rules.push(`@keyframes jps-${name}-${motion}{${frames}} @media (prefers-reduced-motion:no-preference){${selector}{animation:jps-${name}-${motion} ${motion==="slide"?".5s":"3.2s"} ease-in-out ${motion==="slide"?"1":"infinite"}!important}}`);
   };
   rules.push(`/* Janitor Profile Studio — validator-safe semantic selectors */`);
   rules.push(`.pp-page-background, .profile-page-background {
-  background-color: ${c.pageColor} !important;${c.pageImage ? `\n  background-image: url("${safeUrl(c.pageImage)}") !important;` : ""}
+  background-color: ${c.pageColor} !important;
   background-size: ${c.pageSize} !important; background-position: ${safeText(c.pagePosition)} !important; background-repeat: ${c.pageRepeat} !important;
   background-attachment: ${c.pageAttachment} !important; background-blend-mode: ${c.pageBlend} !important;
   filter: ${pageFilter} !important; -webkit-filter: ${pageFilter} !important;${c.pageBlur ? `\n  transform: scale(1.03) !important;` : ""}
@@ -210,22 +366,15 @@ export function generateCss(c:StudioConfig, widgets:Widgets){
   content: ""; position: absolute; inset: 0; pointer-events: none;
   background: radial-gradient(ellipse at center, transparent 45%, ${rgba("#000000",c.vignette)} 100%), ${rgba(c.overlayColor,c.overlayOpacity)} !important;
 }`);
-  if(c.overlayImage) rules.push(`.profile-page-container::after {
-  content: ""; position: fixed; inset: 0; z-index: 20; pointer-events: none;
-  background-image: url("${safeUrl(c.overlayImage)}"); background-size: cover; background-position: center; background-repeat: no-repeat; opacity: ${(c.overlayImageOpacity/100).toFixed(2)};
-}`);
   rules.push(`.profile-page-container { max-width: ${c.maxWidth}px !important; margin-left: auto !important; margin-right: auto !important; }`);
   rules.push(`.profile-page-flex { display: flex !important; flex-direction: ${dir} !important; gap: ${c.layoutGap}px !important; align-items: flex-start !important; }`);
   rules.push(`.pp-uc-background, .profile-uc-background, .profile-uc-background-flex {
   width: ${c.profileWidth}px !important; min-width: ${c.profileWidth}px !important; max-width: ${c.profileWidth}px !important; flex-basis: ${c.profileWidth}px !important;
-  left: ${c.profileOffsetX}px !important; top: ${c.profileOffsetY}px !important;
+  position: ${c.profileSticky?"sticky":"relative"} !important; left: 0; top: ${c.profileSticky?c.headerHeight+16:0}px !important;
   padding: ${c.profilePadding}px !important; background: ${profileBackground} !important; background-size: cover !important; background-position: center !important;
   border: ${c.profileBorderWidth}px ${c.profileBorderStyle} ${c.profileBorderColor} !important; border-radius: ${c.profileRadius}px !important;
   box-shadow: ${shadow(c.profileShadow,c.profileGlow,c.profileBorderColor)} !important; opacity: ${(c.profileOpacity/100).toFixed(2)} !important;
-  min-height: ${c.profileMinHeight}px !important; text-align: ${c.profileAlign} !important;${c.profileGlass ? `\n  backdrop-filter: blur(${c.profileGlass}px); -webkit-backdrop-filter: blur(${c.profileGlass}px);` : ""}${c.profileSticky ? `\n  position: sticky !important; top: ${c.headerHeight + 16 + c.profileOffsetY}px !important;` : ""}
-}`);
-  rules.push(`.pp-cc-list-container {
-  position: relative !important; left: ${c.cardsOffsetX}px !important; top: ${c.cardsOffsetY}px !important;
+  min-height: ${c.profileMinHeight}px !important; text-align: ${c.profileAlign} !important;${c.profileGlass ? `\n  backdrop-filter: blur(${c.profileGlass}px); -webkit-backdrop-filter: blur(${c.profileGlass}px);` : ""}
 }`);
   rules.push(`.profile-background-box-1 { background: transparent !important; } .profile-background-box-2 { background: transparent !important; } .profile-background-box-3 { background: transparent !important; }`);
   rules.push(`.pp-uc-avatar, .profile-avatar {
@@ -242,10 +391,10 @@ export function generateCss(c:StudioConfig, widgets:Widgets){
   letter-spacing: ${c.titleSpacing}px !important; text-transform: ${c.titleTransform} !important; text-shadow: ${c.titleGlow ? `0 0 ${c.titleGlow}px ${rgba(c.titleColor,65)}` : "none"} !important;
 }`);
   rules.push(`.profile-info-wrapper-box, .profile-info-stack, .profile-about-me, .pp-uc-about-me { color: ${c.bodyColor} !important; font-family: "${safeText(c.bodyFont)}", sans-serif !important; font-size: ${c.bodySize}px !important; line-height: ${(c.bodyLineHeight/100).toFixed(2)} !important; text-shadow: ${c.bodyGlow ? `0 0 ${c.bodyGlow}px ${rgba(c.bodyColor,55)}` : "none"} !important; }`);
-  rules.push(`.profile-info-wrapper-box > .profile-info-stack { display: flex !important; flex-direction: column !important; } .profile-info-wrapper-box > .profile-info-stack > .profile-info-hstack { order: ${profileOrder.identity} !important; } .profile-info-wrapper-box > .profile-info-stack > .profile-about-me, .profile-info-wrapper-box > .profile-info-stack > .pp-uc-about-me { order: ${Math.min(profileOrder.about,profileOrder.widgets)} !important; } .profile-info-wrapper-box > .profile-info-stack > .pp-uc-follow-button, .profile-info-wrapper-box > .profile-info-stack > .profile-uc-follow-button { order: ${profileOrder.follow} !important; }`);
+  rules.push(`.profile-info-wrapper-box > .profile-info-stack { display: flex !important; flex-direction: column !important; } .profile-info-wrapper-box > .profile-info-stack > .profile-info-hstack { order: ${profileOrder.identity} !important; } .profile-info-wrapper-box > .profile-info-stack > .profile-about-me, .profile-info-wrapper-box > .profile-info-stack > .pp-uc-about-me { order: ${profileOrder.about} !important; } .profile-info-wrapper-box > .profile-info-stack > .profile-uc-follow-flex, .profile-info-wrapper-box > .profile-info-stack > .pp-uc-about-me + *, .profile-info-wrapper-box > .profile-info-stack > .pp-uc-follow-button, .profile-info-wrapper-box > .profile-info-stack > .profile-uc-follow-button { order: ${profileOrder.follow} !important; }`);
   rules.push(`.pp-uc-followers-count, .profile-followers-count, .pp-uc-member-since, .profile-member-since-box { color: ${c.mutedColor} !important; }`);
   rules.push(`.profile-character-card-creator-name-link, .profile-character-card-creator-name-box { color: ${c.linkColor} !important; } .profile-character-card-creator-name-link:hover { color: ${c.linkHoverColor} !important; }`);
-  rules.push(`.profile-tabs-chakra-tabs { display: flex !important; flex-direction: column !important; } .profile-tabs-panels, .profile-tab-panel, .characters-list-container-flex, .character-list-pagination-flex { display: contents !important; } .profile-tabs-wrapper { order: ${characterOrder.tabs} !important; } .profile-badge-flex-outer { order: ${characterOrder.count} !important; } .profile-filters-flex-outer { order: ${characterOrder.filters} !important; } .pp-cc-list-container, .card-row { order: ${characterOrder.cards} !important; display: flex !important; flex-wrap: wrap !important; gap: ${c.cardGap}px !important; justify-content: ${c.cardJustify} !important; }`);
+  rules.push(generateCharacterStructureRules(c));
   rules.push(`.pp-cc-wrapper, .profile-character-card-wrapper {
   width: ${c.cardWidth}px !important; min-width: ${c.cardWidth}px !important; max-width: ${c.cardWidth}px !important; flex-basis: ${c.cardWidth}px !important;
   min-height: ${c.cardMinHeight}px !important; overflow: hidden !important; border: ${c.cardBorderWidth}px ${c.cardBorderStyle} ${c.cardBorderColor} !important;
@@ -253,6 +402,7 @@ export function generateCss(c:StudioConfig, widgets:Widgets){
   box-shadow: ${shadow(c.cardShadow,0,c.cardBorderColor)} !important; opacity: ${(c.cardOpacity/100).toFixed(2)} !important; transition: transform .24s ease, box-shadow .24s ease, border-color .24s ease !important;
 }`);
   rules.push(`.profile-character-card-stack { background: transparent !important; color: ${c.bodyColor} !important; border-radius: ${c.cardRadius}px !important; }`);
+  rules.push(`.pp-cc-gradient-1, .pp-cc-gradient-2, .pp-cc-gradient-3 { background: transparent !important; }`);
   if(c.cardHoverLift || c.cardHoverGlow || c.cardHoverScale !== 100) rules.push(`.pp-cc-wrapper:hover, .profile-character-card-wrapper:hover { transform: translateY(-${c.cardHoverLift}px) scale(${(c.cardHoverScale/100).toFixed(2)}); box-shadow: ${shadow(c.cardShadow+8,c.cardHoverGlow,c.cardBorderColor)} !important; }`);
   rules.push(`.pp-cc-avatar, .profile-character-card-avatar-image {
   height: ${c.botImageHeight}px !important; object-fit: cover !important; object-position: ${safeText(c.botImagePosition)} !important; filter: ${c.botImageFilter} !important; -webkit-filter: ${c.botImageFilter} !important;
@@ -264,50 +414,55 @@ export function generateCss(c:StudioConfig, widgets:Widgets){
   rules.push(`.css-96l1id, .pp-cc-description, .profile-character-card-description-box, .profile-character-card-description-markdown-container, .profile-character-card-description-markdown-container p { color: ${c.descriptionColor} !important; font-size: ${c.descriptionSize}px !important; text-align: ${c.descriptionAlign} !important; }`);
   rules.push(`.pp-cc-tokens-count, .profile-character-card-tokens-count { color: ${c.tokenColor} !important; }`);
   rules.push(`.pp-cc-tags, .profile-character-card-tags, .card-tags { gap: ${c.tagGap}px !important; } .pp-cc-tags-item, .profile-character-card-tags-item { background: ${c.tagColor} !important; color: ${c.tagTextColor} !important; border: 1px solid ${c.tagBorderColor} !important; border-radius: ${c.tagRadius}px !important; font-size: ${c.tagSize}px !important; }`);
-  rules.push(`.profile-character-card-ribbon, .css-wexxj8 { background: ${c.ribbonColor} !important; } .pp-cc-star, .profile-character-card-star { filter: ${c.starFilter} !important; -webkit-filter: ${c.starFilter} !important; }`);
-  rules.push(`.profile-top-bar-flex-outer, .pp-top-bar-outer {
-  min-height: ${c.headerHeight}px !important; color: ${c.headerTextColor} !important; background: ${c.headerGradient ? `linear-gradient(180deg, ${c.headerColor}, ${c.headerGradientTo})` : c.headerColor} !important;
+  rules.push(`.pp-cc-ribbon, .profile-character-card-ribbon { background: transparent !important; padding: 0 !important; } .pp-cc-ribbon-wrap, .profile-character-card-ribbon-wrap, .profile-character-card-ribbon > .pp-cc-chats-count { display: block; padding: 4px 7px; background: ${c.ribbonColor} !important; border-radius: 4px 0 0 4px; } .pp-cc-star, .profile-character-card-star { filter: ${c.starFilter} !important; -webkit-filter: ${c.starFilter} !important; }`);
+  rules.push(`.pp-top-bar:not(.pp-top-bar-inner), .profile-top-bar-flex-outer, .pp-top-bar-outer {
+  height: ${c.headerHeight}px !important; min-height: ${c.headerHeight}px !important; color: ${c.headerTextColor} !important; background: ${c.headerGradient ? `linear-gradient(180deg, ${c.headerColor}, ${c.headerGradientTo})` : c.headerColor} !important;
   border-bottom: 1px solid ${c.headerBorderColor} !important; border-radius: ${c.headerRadius}px !important;${c.headerBlur ? `\n  backdrop-filter: blur(${c.headerBlur}px); -webkit-backdrop-filter: blur(${c.headerBlur}px);` : ""}
 }`);
-  rules.push(`.profile-top-bar-logo-box, .profile-top-bar-logo-name, .profile-top-bar-logo-sub-name { color: ${c.headerLogoColor} !important; } .profile-top-bar-search-box { color: ${c.headerSearchTextColor} !important; background: ${c.headerSearchColor} !important; border-radius: ${Math.max(4,c.headerRadius)}px !important; } .profile-top-bar-search { color: ${c.headerSearchTextColor} !important; } .profile-top-bar-create-char { color: ${c.headerTextColor} !important; background: ${c.headerCreateColor} !important; border-color: ${c.headerBorderColor} !important; border-radius: ${Math.max(4,c.headerRadius)}px !important; } .pp-top-bar-right .top-icon { color: ${c.headerTextColor} !important; background: ${c.headerIconColor} !important; border-radius: ${Math.max(4,c.headerRadius)}px !important; }`);
-  rules.push(`.pp-tabs-wrapper, .profile-tabs-wrapper { background: ${c.tabColor} !important; border-color: ${c.tabActiveColor} !important; border-radius: ${c.tabRadius}px !important; overflow: hidden !important; box-shadow: ${c.tabGlow?`0 0 ${c.tabGlow}px ${rgba(c.tabActiveColor,60)}`:"none"} !important; } .pp-tabs-button, .profile-tabs-button { color: ${c.tabTextColor} !important; background: ${c.tabColor} !important; } .pp-tabs-button[aria-selected="true"], .profile-tabs-button[aria-selected="true"] { color: ${c.tabActiveColor} !important; } .profile-tabs-indicator { background: ${c.tabActiveColor} !important; }`);
+  rules.push(`.pp-top-bar-logo, .profile-top-bar-logo-box, .profile-top-bar-logo-name, .profile-top-bar-logo-sub-name { color: ${c.headerLogoColor} !important; } .profile-top-bar-search-box { color: ${c.headerSearchTextColor} !important; background: ${c.headerSearchColor} !important; border-radius: ${Math.max(4,c.headerRadius)}px !important; } .pp-top-bar-search, .profile-top-bar-search { color: ${c.headerSearchTextColor} !important; } .pp-top-bar-create-char, .profile-top-bar-create-char { color: ${c.headerTextColor} !important; background: ${c.headerCreateColor} !important; border-color: ${c.headerBorderColor} !important; border-radius: ${Math.max(4,c.headerRadius)}px !important; } [aria-label="Notifications"], .pp-top-bar-app-menu, .pp-top-bar-right .top-icon { color: ${c.headerTextColor} !important; background: ${c.headerIconColor} !important; border-radius: ${Math.max(4,c.headerRadius)}px !important; }`);
+  rules.push(`.pp-tabs-wrapper, .profile-tabs-wrapper { background: ${c.tabColor} !important; border-color: ${c.tabActiveColor} !important; border-radius: ${c.tabRadius}px !important; overflow: hidden !important; box-shadow: ${c.tabGlow?`0 0 ${c.tabGlow}px ${rgba(c.tabActiveColor,60)}`:"none"} !important; } .pp-tabs-button, .profile-tabs-button { color: ${c.tabTextColor} !important; background: ${c.tabColor} !important; } .pp-tabs-button[data-selected], .profile-tabs-button[data-selected], .pp-tabs-button[aria-selected="true"], .profile-tabs-button[aria-selected="true"] { color: ${c.tabActiveColor} !important; } .pp-tabs-indicator, .profile-tabs-indicator { background: ${c.tabActiveColor} !important; }`);
   rules.push(`.pp-fl-search-input, .profile-character-search-input, .pp-fl-filter-button, .profile-filter-button, .transparent .react-select__control {
   color: ${c.searchTextColor} !important; background: ${c.searchColor} !important; border: 1px solid ${c.searchBorderColor} !important; border-radius: ${c.searchRadius}px !important;
 }`);
-  rules.push(`.profile-character-search-input-group { width: ${c.searchWidth}px !important; min-width: ${c.searchWidth}px !important; } .sort-control { color: ${c.searchTextColor} !important; background: ${c.searchColor} !important; border-color: ${c.searchBorderColor} !important; border-radius: ${c.searchRadius}px !important; }`);
+  rules.push(`.profile-character-search-input-group { width: ${c.searchWidth}px !important; min-width: ${c.searchWidth}px !important; } .profile-filters-flex-inner-onorderchanged, .transparent .react-select__control, .sort-control { color: ${c.searchTextColor} !important; background: ${c.searchColor} !important; border-color: ${c.searchBorderColor} !important; border-radius: ${c.searchRadius}px !important; }`);
   rules.push(`.Btn, .Btn2, .Btn2-purple, .pp-uc-follow-button, .profile-uc-follow-button, .pressable-button, .jps-link-button {
   color: ${c.controlTextColor} !important; background: ${c.controlColor} !important; border: 1px solid ${c.controlBorderColor} !important;
   border-radius: ${c.controlRadius}px !important; text-decoration: none !important; box-shadow: ${c.controlGlow ? `0 0 ${c.controlGlow}px ${rgba(c.controlBorderColor,55)}` : "none"} !important;
 }`);
   if(c.followLabel !== "Follow") rules.push(`.pp-uc-follow-text, .profile-uc-follow-text { font-size: 0 !important; } .pp-uc-follow-text::after, .profile-uc-follow-text::after { content: "${safeText(c.followLabel)}"; font-size: ${c.bodySize}px; }`);
-  rules.push(`.pp-footer, footer { min-height: ${c.footerHeight}px !important; color: ${c.footerTextColor} !important; background: ${c.footerColor} !important; border-top: 1px solid ${c.footerBorderColor} !important; justify-content: ${c.footerAlign==="left"?"flex-start":c.footerAlign} !important; } .pp-footer a, footer a { color: ${c.footerTextColor} !important; }`);
-  addMotion("header",c.headerAnimation,".profile-top-bar-flex-outer, .pp-top-bar-outer");
+  rules.push(`.pp-mnb-wrapper, .pp-mnb-container, .pp-footer, footer { min-height: ${c.footerHeight}px !important; color: ${c.footerTextColor} !important; background: ${c.footerColor} !important; border-top: 1px solid ${c.footerBorderColor} !important; justify-content: ${c.footerAlign==="left"?"flex-start":c.footerAlign} !important; } .pp-mnb-wrapper a, .pp-mnb-container a, .pp-footer a, footer a { color: ${c.footerTextColor} !important; }`);
+  addMotion("header",c.headerAnimation,".pp-top-bar:not(.pp-top-bar-inner), .profile-top-bar-flex-outer, .pp-top-bar-outer");
   addMotion("tabs",c.tabAnimation,".pp-tabs-wrapper, .profile-tabs-wrapper");
   addMotion("search",c.searchAnimation,".profile-filters-flex-outer");
-  addMotion("footer",c.footerAnimation,".pp-footer, footer");
-  Object.entries(c.elementOffsets||{}).forEach(([id,offset])=>{const target=editableTargets.find(item=>item.id===id);if(target&&(offset.x||offset.y)){const positioned=["page","header","profile","tabs","cards","footer"].includes(id)?"":"position:relative!important;";rules.push(`${target.selector}{${positioned}left:${Math.round(offset.x)}px!important;top:${Math.round(offset.y)}px!important}`)}});
+  addMotion("footer",c.footerAnimation,".pp-mnb-wrapper, .pp-footer, footer");
   if(c.imageFilterAll !== "none") rules.push(`.profile-page-container img { filter: ${c.imageFilterAll}; -webkit-filter: ${c.imageFilterAll}; transition: filter .2s ease; }${c.imageHoverRestoreAll ? ` .profile-page-container img:hover { filter: none; -webkit-filter: none; }` : ""}`);
   if(c.hideStar) rules.push(`.pp-cc-star, .profile-character-card-star { visibility: hidden !important; }`);
   if(c.hideTokens) rules.push(`.pp-cc-tokens-count, .profile-character-card-tokens-count { display: none !important; }`);
   if(c.hideTags) rules.push(`.pp-cc-tags, .profile-character-card-tags { display: none !important; }`);
   if(c.hideCreator) rules.push(`.pp-cc-creator-name, .profile-character-card-creator-name-box, .profile-character-card-creator-name-link { display: none !important; }`);
   if(c.hideDescription) rules.push(`.css-96l1id, .pp-cc-description, .profile-character-card-description-box, .profile-character-card-description-markdown-container { display: none !important; }`);
-  if(c.hideRibbon) rules.push(`.profile-character-card-ribbon, .css-wexxj8 { display: none !important; }`);
+  if(c.hideRibbon) rules.push(`.pp-cc-ribbon-wrap, .profile-character-card-ribbon-wrap, .pp-cc-ribbon, .profile-character-card-ribbon { display: none !important; }`);
   if(c.hideFollowers) rules.push(`.pp-uc-followers-count, .profile-followers-count { display: none !important; }`);
   if(c.hideMemberSince) rules.push(`.pp-uc-member-since, .profile-member-since-box { display: none !important; }`);
   if(c.hideAbout) rules.push(`.profile-about-me, .pp-uc-about-me { display: none !important; }`);
   if(c.hideSearch) rules.push(`.profile-filters-flex-inner-hassearchfilter, .profile-character-search-input-group { display: none !important; }`);
-  if(c.hideHeader) rules.push(`.profile-top-bar-flex-outer, .pp-top-bar-outer { display: none !important; }`);
-  if(c.hideFooter) rules.push(`footer { display: none !important; }`);
-  rules.push(`.profile-page-container ::selection { background: ${c.selectionColor}; color: ${c.bodyColor}; } .profile-page-container * { scrollbar-color: ${c.scrollbarColor} transparent; }`);
-  if(c.profileAnimation !== "none") rules.push(`@keyframes jps-profile-${c.profileAnimation} { 0%,100% { transform: ${c.profileAnimation === "float" ? "translateY(0)" : "scale(1)"}; } 50% { transform: ${c.profileAnimation === "float" ? "translateY(-6px)" : "scale(1.015)"}; } } .pp-uc-background, .profile-uc-background { animation: jps-profile-${c.profileAnimation} ${c.profileAnimation === "float" ? "4s" : "3s"} ease-in-out infinite; }`);
-  if(c.cardAnimation !== "none") rules.push(`@keyframes jps-card-${c.cardAnimation} { from { opacity: 0; transform: ${c.cardAnimation === "rise" ? "translateY(18px)" : "none"}; } to { opacity: ${(c.cardOpacity/100).toFixed(2)}; transform: none; } } .pp-cc-wrapper, .profile-character-card-wrapper { animation: jps-card-${c.cardAnimation} .45s ease both; }`);
+  if(c.hideHeader) rules.push(`.pp-top-bar:not(.pp-top-bar-inner), .profile-top-bar-flex-outer, .pp-top-bar-outer { display: none !important; }`);
+  if(c.hideFooter) rules.push(`.pp-mnb-wrapper, .pp-footer, footer { display: none !important; }`);
+  rules.push(`.profile-page-container ::selection { background: ${c.selectionColor}; color: ${c.bodyColor}; }`);
+  if(c.profileAnimation !== "none") rules.push(`@keyframes jps-profile-${c.profileAnimation} { 0%,100% { transform: ${c.profileAnimation === "float" ? "translateY(0)" : "scale(1)"}; } 50% { transform: ${c.profileAnimation === "float" ? "translateY(-6px)" : "scale(1.015)"}; } } @media (prefers-reduced-motion:no-preference){.pp-uc-background, .profile-uc-background { animation: jps-profile-${c.profileAnimation} ${c.profileAnimation === "float" ? "4s" : "3s"} ease-in-out infinite; }}`);
+  if(c.cardAnimation !== "none") rules.push(`@keyframes jps-card-${c.cardAnimation} { from { opacity: 0; transform: ${c.cardAnimation === "rise" ? "translateY(18px)" : "none"}; } to { opacity: ${(c.cardOpacity/100).toFixed(2)}; transform: none; } } @media (prefers-reduced-motion:no-preference){.pp-cc-wrapper, .profile-character-card-wrapper { animation: jps-card-${c.cardAnimation} .45s ease both; }}`);
   if(c.profileAnimation !== "none" || c.cardAnimation !== "none") rules.push(`@media (prefers-reduced-motion: reduce) { .pp-uc-background, .profile-uc-background, .pp-cc-wrapper, .profile-character-card-wrapper { animation: none !important; } }`);
   if(widgets.links.length) rules.push(`.jps-links { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; } .jps-link-button { display: inline-block; padding: 10px 16px; font-weight: 700; }`);
   if(widgets.imageButtons.length) rules.push(`.jps-image-buttons { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; } .jps-image-button img { height: auto; transition: transform .2s ease; } .jps-image-button:hover img { transform: translateY(-2px); }`);
   if(widgets.details.length) rules.push(`.jps-details { margin: 10px 0; border: 1px solid ${c.controlBorderColor}; border-radius: ${c.controlRadius}px; overflow: hidden; } .jps-details summary { cursor: pointer; padding: 10px 12px; color: ${c.controlTextColor}; background: ${c.controlColor}; font-weight: 700; } .jps-details p { padding: 10px 12px; margin: 0; color: ${c.bodyColor}; }`);
   if(widgets.experiences.length) rules.push(`.jps-experiences { display: grid; gap: 10px; margin: 12px 0; } .jps-experience { position: relative; display: grid; grid-template-columns: auto 1fr; gap: 4px 11px; padding: 13px 14px; overflow: hidden; color: ${c.bodyColor} !important; background: ${c.controlColor}; border: 1px solid ${c.controlBorderColor}; border-radius: ${c.controlRadius}px; text-decoration: none !important; box-shadow: ${c.controlGlow ? `0 0 ${c.controlGlow}px ${rgba(c.controlBorderColor,45)}` : "none"}; transition: transform .2s ease, border-color .2s ease; } .jps-experience:hover { transform: translateY(-2px); border-color: ${c.linkHoverColor}; } .jps-experience-kind { grid-row: 1 / 4; align-self: start; min-width: 42px; padding: 6px 7px; color: ${c.controlTextColor}; background: ${c.tabActiveColor}; border-radius: ${Math.max(4,Math.round(c.controlRadius/2))}px; font-size: 8px; font-weight: 800; letter-spacing: 1px; text-align: center; text-transform: uppercase; } .jps-experience strong { color: ${c.linkColor}; font-size: 14px; } .jps-experience p { margin: 0; color: ${c.mutedColor}; font-size: 11px; line-height: 1.45; } .jps-experience b { color: ${c.linkHoverColor}; font-size: 9px; letter-spacing: .8px; text-transform: uppercase; }`);
-  widgets.layers.forEach(layer=>{const selector=`.jps-layer-${layer.id}`;rules.push(`${selector}{position:relative!important;left:${layer.x}px!important;top:${layer.y}px!important;width:${layer.width}px!important;max-width:100%!important;padding:${layer.kind==="box"?"14px":"4px"}!important;color:${layer.color}!important;background:${layer.kind==="box"?layer.background:"transparent"}!important;border-radius:${layer.radius}px!important;font-size:${layer.fontSize}px!important;z-index:5!important}${selector} img{display:block!important;width:100%!important;height:auto!important;border-radius:${layer.radius}px!important}`);addMotion(`layer-${layer.id}`,layer.animation,selector)});
+  widgets.layers.forEach(layer=>{
+    const selector=`.jps-layer-${layer.id}`;
+    const filled=["box","button","badge"].includes(layer.kind);
+    const padding=layer.kind==="divider"?"0":layer.kind==="badge"?"6px 10px":layer.kind==="button"?"10px 16px":layer.kind==="box"?"14px":"4px";
+    rules.push(`${selector}{position:relative!important;display:${layer.hidden?"none":layer.kind==="button"?"inline-flex":layer.kind==="badge"?"inline-flex":"block"}!important;left:${layer.x}px!important;top:${layer.y}px!important;width:${layer.width}px!important;max-width:100%!important;${layer.height>0?`height:${layer.height}px!important;min-height:0!important;`:""}padding:${padding}!important;color:${layer.color}!important;background:${filled?layer.background:"transparent"}!important;border-radius:${layer.radius}px!important;font-size:${layer.fontSize}px!important;opacity:${(layer.opacity/100).toFixed(2)}!important;z-index:${layer.zIndex}!important;transform:rotate(${layer.rotation}deg);${layer.kind==="button"?"align-items:center!important;justify-content:center!important;text-decoration:none!important;font-weight:800!important;":""}${layer.kind==="badge"?"align-items:center!important;justify-content:center!important;font-weight:800!important;":""}}${selector} img{display:block!important;width:100%!important;height:${layer.height>0?"100%":"auto"}!important;object-fit:cover!important;border-radius:${layer.radius}px!important}${selector}.jps-layer-divider{height:${Math.max(1,layer.height||2)}px!important;padding:0!important;background:${layer.background}!important}`);
+    addMotion(`layer-${layer.id}`,layer.animation,selector,`rotate(${layer.rotation}deg)`,layer.opacity/100);
+  });
   widgets.dolls.forEach((d,i)=>rules.push(`.jps-page-doll-${i+1} { position: fixed; ${d.side}: 10px; bottom: ${d.bottom}px; z-index: 1000; pointer-events: none; } .jps-page-doll-${i+1} img { width: ${d.width}px; max-width: 100%; height: auto; }`));
   rules.push(`@media only screen and (max-width: ${c.breakpoint}px) {
   .profile-page-container { padding-left: ${c.mobilePadding}px !important; padding-right: ${c.mobilePadding}px !important; }
@@ -316,19 +471,43 @@ export function generateCss(c:StudioConfig, widgets:Widgets){
   .pp-cc-wrapper, .profile-character-card-wrapper { width: ${c.mobileCardWidth}px !important; min-width: ${c.mobileCardWidth}px !important; max-width: 100% !important; flex-basis: ${c.mobileCardWidth}px !important; }${c.hideOverlayMobile ? `\n  .profile-page-container::after { display: none !important; }` : ""}
   ${widgets.dolls.map((d,i)=>d.hideMobile ? `.jps-page-doll-${i+1}` : "").filter(Boolean).join(", ")} ${widgets.dolls.some(d=>d.hideMobile) ? "{ display: none !important; }" : ""}
 }`);
+  rules.push(...generateElementFrameRules(c));
   if(c.customCss.trim()) rules.push(`/* Custom additions */\n${unwrap(c.customCss).trim()}`);
   return ensureWrapped(rules.join("\n\n"));
 }
 
+export function generateCanvasOverrides(c:StudioConfig,widgets:Widgets){
+  const rules=[`/* Patchies canvas overrides — kept active above imported/manual CSS */`,generateCharacterStructureRules(c)];
+  rules.push(...generateElementFrameRules(c));
+  widgets.layers.forEach(layer=>{const selector=`.jps-layer-${layer.id}`,filled=["box","button","badge"].includes(layer.kind),padding=layer.kind==="divider"?"0":layer.kind==="badge"?"6px 10px":layer.kind==="button"?"10px 16px":layer.kind==="box"?"14px":"4px";rules.push(`${selector}{position:relative!important;display:${layer.hidden?"none":layer.kind==="button"||layer.kind==="badge"?"inline-flex":"block"}!important;left:${layer.x}px!important;top:${layer.y}px!important;width:${layer.width}px!important;max-width:100%!important;${layer.height>0?`height:${layer.height}px!important;min-height:0!important;`:""}padding:${padding}!important;color:${layer.color}!important;background:${filled?layer.background:"transparent"}!important;border-radius:${layer.radius}px!important;font-size:${layer.fontSize}px!important;opacity:${(layer.opacity/100).toFixed(2)}!important;z-index:${layer.zIndex}!important;transform:rotate(${layer.rotation}deg)}${selector} img{display:block!important;width:100%!important;height:${layer.height>0?"100%":"auto"}!important;object-fit:cover!important;border-radius:${layer.radius}px!important}${selector}.jps-layer-divider{height:${Math.max(1,layer.height||2)}px!important;padding:0!important;background:${layer.background}!important}`);if(layer.animation!=="none"){const rotate=`rotate(${layer.rotation}deg) `,frames=layer.animation==="float"?`0%,100%{transform:${rotate}translateY(0)}50%{transform:${rotate}translateY(-6px)}`:layer.animation==="pulse"?`0%,100%{transform:${rotate}scale(1)}50%{transform:${rotate}scale(1.025)}`:layer.animation==="glow"?"0%,100%{filter:drop-shadow(0 0 0 transparent)}50%{filter:drop-shadow(0 0 10px currentColor)}":`0%{opacity:0;transform:${rotate}translateX(-18px)}100%{opacity:${(layer.opacity/100).toFixed(2)};transform:${rotate}translateX(0)}`;rules.push(`@keyframes jps-layer-${layer.id}-${layer.animation}{${frames}}@media(prefers-reduced-motion:no-preference){${selector}{animation:jps-layer-${layer.id}-${layer.animation} ${layer.animation==="slide"?".5s":"3.2s"} ease-in-out ${layer.animation==="slide"?"1":"infinite"}!important}}`)}});
+  return ensureWrapped(rules.join("\n\n"));
+}
+
+const PATCHIES_HTML_START="<!-- PATCHIES:GENERATED:START -->";
+const PATCHIES_HTML_END="<!-- PATCHIES:GENERATED:END -->";
+
 export function generateHtml(w:Widgets){
   const chunks:string[]=[];
-  w.layers.forEach(layer=>{const body=layer.kind==="image"?`<img src="${escapeHtml(layer.url)}" alt="${escapeHtml(layer.name)}">`:layer.kind==="box"?`<strong>${escapeHtml(layer.name)}</strong><p>${escapeHtml(layer.content)}</p>`:escapeHtml(layer.content);chunks.push(`<div class="jps-explorer-layer jps-layer-${layer.id}">${body}</div>`)});
+  w.layers.forEach(layer=>{
+    if(layer.kind==="button"){chunks.push(`<a class="jps-explorer-layer jps-layer-${layer.id} jps-layer-button" href="${escapeHtml(layer.url)}" target="_blank" rel="noopener noreferrer nofollow">${escapeHtml(layer.content||layer.name)}</a>`);return}
+    const body=layer.kind==="image"?`<img src="${escapeHtml(layer.url)}" alt="${escapeHtml(layer.name)}">`:layer.kind==="box"?`<strong>${escapeHtml(layer.name)}</strong><p>${escapeHtml(layer.content)}</p>`:layer.kind==="divider"?"":escapeHtml(layer.content||layer.name);
+    chunks.push(`<div class="jps-explorer-layer jps-layer-${layer.id} jps-layer-${layer.kind}">${body}</div>`);
+  });
   if(w.experiences.length) chunks.push(`<div class="jps-experiences">\n${w.experiences.map(x=>`  <a href="${escapeHtml(x.url)}" class="jps-experience jps-experience-${x.kind}" target="_blank" rel="noopener noreferrer nofollow"><span class="jps-experience-kind">${escapeHtml(x.kind)}</span><strong>${escapeHtml(x.title)}</strong><p>${escapeHtml(x.description)}</p><b>${escapeHtml(x.label)} →</b></a>`).join("\n")}\n</div>`);
   if(w.links.length) chunks.push(`<div class="jps-links">\n${w.links.map(x=>`  <a href="${escapeHtml(x.url)}" class="jps-link-button" target="_blank" rel="noopener noreferrer nofollow">${escapeHtml(x.label)}</a>`).join("\n")}\n</div>`);
   if(w.imageButtons.length) chunks.push(`<div class="jps-image-buttons">\n${w.imageButtons.map(x=>`  <a href="${escapeHtml(x.url)}" class="jps-image-button" target="_blank" rel="noopener noreferrer nofollow"><img src="${escapeHtml(x.image)}" alt="${escapeHtml(x.alt)}" style="width:${x.width}px"></a>`).join("\n")}\n</div>`);
   w.details.forEach(x=>chunks.push(`<details class="jps-details"${x.open?" open":""}>\n  <summary>${escapeHtml(x.summary)}</summary>\n  <p>${escapeHtml(x.content)}</p>\n</details>`));
   w.dolls.forEach((x,i)=>chunks.push(`<div class="jps-page-doll-${i+1}"><img src="${escapeHtml(x.image)}" alt="${escapeHtml(x.alt)}"></div>`));
-  return chunks.join("\n\n");
+  return chunks.length?`${PATCHIES_HTML_START}\n${chunks.join("\n\n")}\n${PATCHIES_HTML_END}`:"";
+}
+
+export function mergeProfileHtml(manualHtml:string,generatedHtml:string){
+  const manual=manualHtml.trim(),generated=generatedHtml.trim();
+  const start=manual.indexOf(PATCHIES_HTML_START),end=start>=0?manual.indexOf(PATCHIES_HTML_END,start+PATCHIES_HTML_START.length):-1;
+  if(start>=0&&end>=start){
+    return `${manual.slice(0,start).trim()}\n\n${generated}\n\n${manual.slice(end+PATCHIES_HTML_END.length).trim()}`.trim();
+  }
+  return [manual,generated].filter(Boolean).join("\n\n");
 }
 
 export function inspectCss(source:string):Diagnostic[]{
@@ -338,6 +517,7 @@ export function inspectCss(source:string):Diagnostic[]{
   if(/\b(?:min|max|clamp)\s*\(/i.test(body)) out.push({level:"error",message:"Janitor's validator may reject min(), max(), and clamp(). Use width plus max-width/min-width instead."});
   if(/(?:mask-image|-webkit-mask-image)\s*:\s*url\s*\(/i.test(body)) out.push({level:"error",message:"Janitor blocks URL-based masks. Gradient masks and clip-path basic shapes are safer."});
   if(/clip-path\s*:\s*url\s*\(/i.test(body)) out.push({level:"warning",message:"URL clip paths may be sanitized. Use circle(), inset(), ellipse(), or polygon()."});
+  if(/\burl\s*\(/i.test(body)) out.push({level:"error",message:"Janitor's current sanitizer can strip CSS url() values. Use an HTML image layer, image button, or page doll instead."});
   if(/@import\b/i.test(body)) out.push({level:"warning",message:"Imported fonts/styles can fail or be blocked. Prefer web-safe font stacks."});
   if(/button\[class\*=/i.test(body)) out.push({level:"warning",message:"Wildcard button selectors can style menus, pagination, and unrelated controls."});
   if(/(^|})\s*a\s*\{/im.test(body)) out.push({level:"warning",message:"A bare a selector affects navigation and footer links. Target Janitor semantic link classes."});
@@ -353,8 +533,8 @@ export function inspectCss(source:string):Diagnostic[]{
 }
 
 export const compatibility = [
-  {status:"Works",items:["Solid colors and CSS gradients","HTTPS background images and GIFs","Filters and hover filters","Gradient mask-image fades","clip-path basic shapes","Media queries","Text and box shadows","Pseudo-element text","HTML links, image buttons, details and page dolls"]},
-  {status:"Risky",items:["Generated .css-xxxxx selectors","@import and remote fonts","content: url() replacements","Broad html/body/header/a/button rules","Heavy blur and fixed overlays on mobile","New CSS functions accepted by browsers but rejected by Janitor's editor"]},
+  {status:"Works",items:["Solid colors and CSS gradients","HTML images and GIFs","Filters and hover filters","Gradient mask-image fades","clip-path basic shapes","Media queries","Text and box shadows","Pseudo-element text","HTML links, image buttons, details and page dolls"]},
+  {status:"Risky",items:["Generated .css-xxxxx selectors","CSS url() backgrounds","@import and remote fonts","content: url() replacements","Broad html/body/header/a/button rules","Heavy blur and fixed overlays on mobile","New CSS functions accepted by browsers but rejected by Janitor's editor"]},
   {status:"Blocked",items:["JavaScript in profile content","file:// image paths","URL-based image masks","Some star/icon image replacements","CSS that escapes Janitor's sanitizer"]},
 ];
 
@@ -363,10 +543,11 @@ export type ImportedProfileSource = {
   css: string;
   html: string;
   kind: "janitor-page" | "profile-source";
+  hadManagedHtml: boolean;
 };
 
 export function assembleProfileSource(css:string, html:string){
-  return `${ensureWrapped(css).trim()}${html.trim() ? `\n\n${html.trim()}` : ""}`;
+  return `${html.trim() ? `${html.trim()}\n\n` : ""}${ensureWrapped(css).trim()}`;
 }
 
 export function extractProfileSource(input:string):ImportedProfileSource {
@@ -383,14 +564,18 @@ export function extractProfileSource(input:string):ImportedProfileSource {
       kind="janitor-page";
     }catch{throw new Error("The Janitor page source uses an About Me format this version cannot decode.")}
   }else if(/<html\b/i.test(source)){
-    const block=source.match(/<(?:div|p)[^>]*class=["'][^"']*(?:pp-uc-about-me|profile-about-me)[^"']*["'][^>]*>([\s\S]*?)<\/(?:div|p)>/i);
+    if(typeof DOMParser==="undefined") throw new Error("Saved-page HTML import is available in the browser editor.");
+    const document=new DOMParser().parseFromString(source,"text/html");
+    const block=document.querySelector<HTMLElement>(".pp-uc-about-me, .profile-about-me");
     if(!block) throw new Error("No editable About Me source was found in that saved page.");
-    source=block[1];kind="janitor-page";
+    source=block.innerHTML;kind="janitor-page";
   }
   const styles=[...source.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/gi)];
   const css=styles.length?ensureWrapped(styles.map(match=>match[1]).join("\n\n")):ensureWrapped("");
   const html=source.replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi,"").trim();
-  return {css,html,kind};
+  const hadManagedHtml=html.includes(PATCHIES_HTML_START)&&html.includes(PATCHIES_HTML_END);
+  const detachedHtml=hadManagedHtml?html.replace(PATCHIES_HTML_START,"").replace(PATCHIES_HTML_END,"").trim():html;
+  return {css,html:detachedHtml,kind,hadManagedHtml};
 }
 
 const REAL_PREVIEW_BASE=`
@@ -413,11 +598,44 @@ export function previewDocumentV8(css:string,c:StudioConfig,w:Widgets,htmlOverri
       ? `<img class="pp-cc-avatar profile-character-card-avatar-image" src="${escapeHtml(safeUrl(card.image))}" alt="${escapeHtml(card.name)}">`
       : `<div class="pp-cc-avatar profile-character-card-avatar-image preview-bot-placeholder"><span>TEST BOT<br>IMAGE</span></div>`;
     const tags=card.tags.map((tag,tagIndex)=>`<li class="pp-cc-tags-wrap profile-character-card-tags-wrap"><span class="pp-cc-tags-item profile-character-card-tags-item ${tagIndex===0?"profile-character-card-tag-limitless":""}">${escapeHtml(tag)}</span></li>`).join("");
-    return `<article class="pp-cc-wrapper profile-character-card-wrapper" data-preview-bot="${index}"><div class="pp-cc-gradient-1"></div><div class="pp-cc-gradient-2"></div><div class="pp-cc-gradient-3"></div><div class="profile-character-card-stack"><a class="profile-character-card-stack-link-component"><div class="profile-character-card-stack-link-component-box"><div class="pp-cc-name profile-character-card-name-box">${escapeHtml(card.name||"Untitled Test Bot")}</div><div class="profile-character-card-stats-box"><div class="pp-cc-ribbon profile-character-card-ribbon"><span class="pp-cc-chats-count profile-character-card-chats-count">◫ ${escapeHtml(card.chats||"0")}</span></div></div><div class="profile-character-card-avatar-aspect-ratio">${artwork}</div></div></a><a class="profile-character-card-creator-name-link"><span class="pp-cc-creator-name profile-character-card-creator-name-box">@${escapeHtml(username)}</span></a><div class="profile-character-card-description-box"><div class="pp-cc-description profile-character-card-description-markdown-container"><p>${escapeHtml(card.description)}</p></div></div><div class="pp-cc-star-line profile-character-card-star-line"><span class="pp-cc-star profile-character-card-star">✦</span></div><ul class="pp-cc-tags profile-character-card-tags">${tags}</ul><div class="profile-character-card-box"><p class="pp-cc-tokens-count profile-character-card-tokens-count">${escapeHtml(card.tokens||"0 tokens")}</p></div></div></article>`;
+    return `<article class="pp-cc-wrapper profile-character-card-wrapper" data-preview-bot="${index}">
+      <div class="pp-cc-gradient-1"></div><div class="pp-cc-gradient-2"></div><div class="pp-cc-gradient-3"></div>
+      <div class="profile-character-card-stack">
+        <a class="profile-character-card-stack-link-component"><div class="profile-character-card-stack-link-component-box">
+          <div class="pp-cc-name profile-character-card-name-box">${escapeHtml(card.name||"Untitled Test Bot")}</div>
+          <div class="profile-character-card-stats-box"><div class="pp-cc-ribbon profile-character-card-ribbon"><div class="pp-cc-ribbon-wrap profile-character-card-ribbon-wrap"><span class="pp-cc-chats-count profile-character-card-chats-count">◫ ${escapeHtml(card.chats||"0")}</span></div></div></div>
+          <div class="profile-character-card-avatar-aspect-ratio">${artwork}</div>
+        </div></a>
+        <a class="profile-character-card-creator-name-link"><span class="pp-cc-creator-name profile-character-card-creator-name-box">@${escapeHtml(username)}</span></a>
+        <div class="profile-character-card-description-box"><div class="pp-cc-description profile-character-card-description-markdown-container"><p>${escapeHtml(card.description)}</p></div></div>
+        <div class="pp-cc-star-line profile-character-card-star-line"><span class="pp-cc-star profile-character-card-star">✦</span></div>
+        <ul class="pp-cc-tags profile-character-card-tags">${tags}</ul>
+        <div class="profile-character-card-box"><p class="pp-cc-tokens-count profile-character-card-tokens-count">${escapeHtml(card.tokens||"0 tokens")}</p></div>
+      </div>
+    </article>`;
   }).join("");
   const countLabel=`${bots.length} ${bots.length===1?"character":"characters"}`;
   const cardArea=cards||`<div class="preview-empty-bots"><b>No local test bots.</b><span>Add one from Test data whenever you want.</span></div>`;
-  return `<!doctype html><html data-theme="dark"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${REAL_PREVIEW_BASE}.preview-avatar-placeholder,.preview-bot-placeholder{display:grid!important;place-items:center;text-align:center;color:#d7cbd9;background:repeating-linear-gradient(135deg,#2d2830 0 12px,#211e24 12px 24px)!important;font-weight:900;letter-spacing:.08em}.preview-bot-placeholder span{font-size:12px;line-height:1.5}.preview-empty-bots{display:flex;min-height:210px;width:100%;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:#b9b3bc;border:1px dashed #73717a;border-radius:10px}.preview-empty-bots span{font-size:12px}.jps-drag-mode .profile-uc-background,.jps-drag-mode .pp-cc-list-container{cursor:grab!important;outline:2px dashed #ff4e8a!important;outline-offset:4px!important}.jps-drag-mode .profile-uc-background:active,.jps-drag-mode .pp-cc-list-container:active{cursor:grabbing!important}</style><style>${unwrap(css)}</style></head><body><header class="profile-top-bar-flex-outer pp-top-bar-outer"><div class="pp-top-bar profile-top-bar pp-top-bar-inner"><div class="pp-top-bar-left profile-top-box-flex-inner"><a class="profile-top-bar-logo-box"><h2 class="pp-top-bar-logo-name profile-top-bar-logo-name">janitor</h2><p class="pp-top-bar-logo-sub-name profile-top-bar-logo-sub-name">beta</p></a><div class="profile-top-bar-search-wrapper"><div class="profile-top-bar-search-box"><span>⌕</span><span class="pp-top-bar-search profile-top-bar-search">Search for characters or creators</span></div></div></div><div class="pp-top-bar-right"><a class="pp-top-bar-create-char profile-top-bar-create-char">Create a Character</a><span class="top-icon">◇</span><span class="top-icon">T</span></div></div></header><main class="chakra-stack profile-page-container"><div class="pp-page-background profile-page-background"></div><div class="profile-page-flex"><aside class="pp-uc-background profile-uc-background profile-uc-background-flex"><div class="profile-background-box-1"></div><div class="profile-background-box-2"></div><div class="profile-background-box-3"></div><div class="profile-info-wrapper-box"><div class="profile-info-stack"><div class="profile-info-hstack"><div class="pp-uc-avatar-container profile-avatar-container">${avatar}</div><div class="profile-info-stack-inner"><div class="profile-info-stack-inner-flex"><h1 class="pp-uc-title profile-title-heading">@${escapeHtml(username)}</h1></div><div class="pp-uc-followers-count profile-followers-count">${escapeHtml(profile.followers||"0")} followers</div><div class="pp-uc-member-since profile-member-since-box">Preview data only</div></div></div><div class="pp-uc-about-me profile-about-me">${profileHtml}</div><button class="Btn pp-uc-follow-button profile-uc-follow-button"><span class="pp-uc-follow-text profile-uc-follow-text">${escapeHtml(c.followLabel||"Follow")}</span></button></div></div></aside><section class="profile-page-container-flex-box"><div class="profile-tabs-chakra-tabs"><div class="pp-tabs-wrapper profile-tabs-wrapper"><button class="pp-tabs-button profile-tabs-button" aria-selected="true">Characters</button><i class="pp-tabs-indicator profile-tabs-indicator"></i></div><div class="pp-tabs-panels profile-tabs-panels"><div class="profile-tab-panel"><div class="characters-list-container-flex"><div class="character-list-pagination-flex"><span class="profile-badge-flex-outer">${countLabel}</span><div class="profile-filters-flex-outer"><div class="profile-filters-flex-inner-hassearchfilter profile-character-search-input-group"><input class="pp-fl-search-input profile-character-search-input" placeholder="Search for characters"></div><button class="pp-fl-filter-button profile-filter-button">▽</button><button class="transparent sort-control">Latest⌄</button></div></div><div class="pp-cc-list-container">${cardArea}</div></div></div></div></div></section></div></main><footer class="pp-footer"><span><b>janitor</b> — local styling preview</span><span class="footer-links"><a>careers</a><a>news</a><a>status</a><a>guidelines</a><a>safety</a><a>terms</a><a>support</a></span></footer></body></html>`;
+  return `<!doctype html>
+<html data-theme="dark"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<style>${REAL_PREVIEW_BASE}.preview-avatar-placeholder,.preview-bot-placeholder{display:grid!important;place-items:center;text-align:center;color:#d7cbd9;background:repeating-linear-gradient(135deg,#2d2830 0 12px,#211e24 12px 24px)!important;font-weight:900;letter-spacing:.08em}.preview-bot-placeholder span{font-size:12px;line-height:1.5}.preview-empty-bots{display:flex;min-height:210px;width:100%;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:#b9b3bc;border:1px dashed #73717a;border-radius:10px}.preview-empty-bots span{font-size:12px}.jps-drag-mode .profile-uc-background,.jps-drag-mode .pp-cc-list-container{cursor:grab!important;outline:2px dashed #ff4e8a!important;outline-offset:4px!important}.jps-drag-mode .profile-uc-background:active,.jps-drag-mode .pp-cc-list-container:active{cursor:grabbing!important}</style>
+<style>${unwrap(css)}</style></head><body>
+<header class="profile-top-bar-flex-outer pp-top-bar-outer"><div class="pp-top-bar profile-top-bar pp-top-bar-inner"><div class="pp-top-bar-left profile-top-box-flex-inner"><a class="profile-top-bar-logo-box"><h2 class="pp-top-bar-logo-name profile-top-bar-logo-name">janitor</h2><p class="pp-top-bar-logo-sub-name profile-top-bar-logo-sub-name">beta</p></a><div class="profile-top-bar-search-wrapper"><div class="profile-top-bar-search-box"><span>⌕</span><span class="pp-top-bar-search profile-top-bar-search">Search for characters or creators</span></div></div></div><div class="pp-top-bar-right"><a class="pp-top-bar-create-char profile-top-bar-create-char">Create a Character</a><span class="top-icon">◇</span><span class="top-icon">T</span></div></div></header>
+<main class="chakra-stack profile-page-container"><div class="pp-page-background profile-page-background"></div><div class="profile-page-flex">
+<aside class="pp-uc-background profile-uc-background profile-uc-background-flex"><div class="profile-background-box-1"></div><div class="profile-background-box-2"></div><div class="profile-background-box-3"></div><div class="profile-info-wrapper-box"><div class="profile-info-stack"><div class="profile-info-hstack"><div class="pp-uc-avatar-container profile-avatar-container">${avatar}</div><div class="profile-info-stack-inner"><div class="profile-info-stack-inner-flex"><h1 class="pp-uc-title profile-title-heading">@${escapeHtml(username)}</h1></div><div class="pp-uc-followers-count profile-followers-count">${escapeHtml(profile.followers||"0")} followers</div><div class="pp-uc-member-since profile-member-since-box">Preview data only</div></div></div><div class="pp-uc-about-me profile-about-me">${profileHtml}</div><div class="profile-uc-follow-flex"><button class="Btn pp-uc-follow-button profile-uc-follow-button"><span class="pp-uc-follow-text profile-uc-follow-text">${escapeHtml(c.followLabel||"Follow")}</span></button></div></div></div></aside>
+<section class="profile-page-container-flex-box"><div class="profile-tabs-chakra-tabs">
+  <div class="pp-tabs-wrapper profile-tabs-wrapper"><button class="pp-tabs-button profile-tabs-button" aria-selected="true">Characters</button><i class="pp-tabs-indicator profile-tabs-indicator"></i></div>
+  <div class="pp-tabs-panels profile-tabs-panels"><div class="profile-tab-panel"><div class="characters-list-container-flex">
+    <div class="character-list-pagination-flex">
+      <div class="character-list-pagination-box"><div class="profile-pagination-flex-outer"><span class="pp-pg-total profile-badge-flex-outer">${countLabel}</span></div></div>
+      <div class="css-zdpt2t"><div class="profile-filters-flex-outer"><div class="profile-filters-flex-inner-hassearchfilter profile-character-search-input-group"><input class="pp-fl-search-input profile-character-search-input" placeholder="Search for characters"></div><button class="pp-fl-filter-button profile-filter-button">▽</button><div class="profile-filters-flex-inner-onorderchanged"><button class="transparent sort-control">Latest⌄</button></div></div></div>
+    </div>
+    <div class="pp-cc-list-container">${cardArea}</div>
+    <div class="profile-pagination-flex-outer preview-pagination-bottom"><span>1 / 1</span></div>
+  </div></div></div>
+</div></section></div></main>
+<footer class="pp-footer"><span><b>janitor</b> — local styling preview</span><span class="footer-links"><a>careers</a><a>news</a><a>status</a><a>guidelines</a><a>safety</a><a>terms</a><a>support</a></span></footer>
+</body></html>`;
 }
 
 const cleanPreviewMarkup=(value:string)=>value

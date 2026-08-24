@@ -27,6 +27,20 @@ export function clampToGame(pos: Vec2, dims: GameDims) {
   };
 }
 
+export function mapGamePosition(pos: Vec2, from: GameDims, to: GameDims) {
+  if (!from.width || !from.height || !to.width || !to.height) {
+    return clampToGame(pos, to);
+  }
+
+  return clampToGame(
+    {
+      x: (pos.x / from.width) * to.width,
+      y: (pos.y / from.height) * to.height,
+    },
+    to,
+  );
+}
+
 export function detectTouchControls() {
   if (typeof window === "undefined") return false;
   return (

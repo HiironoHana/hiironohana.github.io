@@ -11,7 +11,10 @@ export default function GameOverScreen({ score, onRestart, uiScale = 1 }: Props)
   return (
     <div
       className="absolute inset-0 z-[220] flex items-center justify-center"
-      style={{ background: "#000", animation: "utFadeIn 0.5s steps(4) forwards" }}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="game-over-title"
+      style={{ background: "#000", animation: "utFadeIn 0.5s steps(4) forwards", overflowY:"auto", padding:"max(20px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left))" }}
     >
       <div
         style={{
@@ -24,6 +27,8 @@ export default function GameOverScreen({ score, onRestart, uiScale = 1 }: Props)
           maxWidth: 440 * uiScale,
           width: "90%",
           background: "#000",
+          maxHeight: "calc(100svh - 40px)",
+          overflowY: "auto",
         }}
       >
         <p
@@ -38,6 +43,7 @@ export default function GameOverScreen({ score, onRestart, uiScale = 1 }: Props)
           * you feel your sins crawling on your back.
         </p>
         <div
+          id="game-over-title"
           style={{
             fontSize: Math.max(30, 52 * uiScale),
             fontWeight: 900,

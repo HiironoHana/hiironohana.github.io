@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://patchies.nanaka-desu.chatgpt.site";
+
 export const metadata: Metadata = {
-  metadataBase: new URL("https://hiironohana.github.io"),
+  metadataBase: new URL(siteUrl),
   title: {
     default: "Patchies — games, tools & weird web stuff",
     template: "%s | Patchies",
@@ -15,7 +17,7 @@ export const metadata: Metadata = {
     title: "Patchies",
     description: "Games, tools & weird web stuff—built by Patchies.",
     type: "website",
-    url: "https://hiironohana.github.io",
+    url: siteUrl,
     images: [{ url: "/og.png", width: 1731, height: 908, alt: "Patchies — games, tools & weird web stuff" }],
   },
   twitter: {

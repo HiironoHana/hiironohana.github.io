@@ -20,8 +20,9 @@ export function loadPeerJs() {
   }
 
   if (!loader) {
-    loader = new Promise<PeerConstructor>((resolve, reject) => {
-      const script = document.createElement("script");
+    let script: HTMLScriptElement;
+    const pending = new Promise<PeerConstructor>((resolve, reject) => {
+      script = document.createElement("script");
       script.src = "https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js";
       script.async = true;
       script.onload = () => {
@@ -33,6 +34,11 @@ export function loadPeerJs() {
       };
       script.onerror = () => reject(new Error("Failed to load PeerJS."));
       document.head.appendChild(script);
+    });
+    loader = pending.catch((error) => {
+      loader = null;
+      script.remove();
+      throw error;
     });
   }
 

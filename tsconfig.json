@@ -32,9 +32,6 @@
   ],
   "exclude": [
     "node_modules",
-    ".tmp-meson",
-    "external",
-    "out",
-    "public/taisei-web"
+    "out"
   ]
 }

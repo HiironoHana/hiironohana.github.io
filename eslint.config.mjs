@@ -9,11 +9,8 @@ const eslintConfig = defineConfig([
   globalIgnores([
     // Default ignores of eslint-config-next:
     ".next/**",
-    ".tmp-meson/**",
-    "external/**",
+    "dist/**",
     "out/**",
-    "public/taisei-web/*.js",
-    "public/taisei-web/data/**",
     "build/**",
     "next-env.d.ts",
   ]),

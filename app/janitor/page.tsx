@@ -3,25 +3,29 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Janitor Tools — made by Patchies",
-  description: "Free, practical tools for making and maintaining Janitor.AI profiles without losing your mind to CSS.",
+  description: "A drag-and-resize Janitor.AI profile studio with layers, presets, shortcuts, compatibility checks, autosave, and recovery backups.",
+  alternates: { canonical: "/janitor/" },
+  openGraph: { title: "Patchies Janitor Tools", description: "Build a Janitor.AI profile visually, then export one complete About Me source.", url: "/janitor/", images: [{url:"/og.png",width:1731,height:908,alt:"Patchies Janitor Tools"}] },
+  twitter: { card:"summary_large_image", title:"Patchies Janitor Tools", description:"The drag-and-resize Janitor.AI profile studio.", images:["/og.png"] },
 };
 
 const features = [
-  ["Point at stuff", "Use the element picker on a Janitor-shaped preview instead of guessing which mystery selector you need."],
-  ["See it immediately", "Change colors, spacing, cards, buttons, images, and more while the preview updates right beside you."],
-  ["Bring the fun bits", "Add image buttons, page dolls, details boxes, links, and cards for experiences hosted somewhere else."],
-  ["Export the whole thing", "Copy or download a complete wrapped style block, with a compatibility check before it leaves the editor."],
+  ["Grab literally anything", "Switch between the Element and Layout tools, click the real Janitor-shaped preview, then drag or resize from eight border handles."],
+  ["Build actual layers", "Add text, images, boxes, badges, links, and dividers from Explorer—with position, size, depth, lock, hide, colour, and motion controls."],
+  ["Make mistakes safely", "Undo the whole project, autosave while you type, keep rotating recovery points, detect cross-tab conflicts, and download portable backups."],
+  ["Export the whole thing", "Copy one complete About Me block using stable Janitor semantic selectors, with manual CSS and canvas overrides combined correctly."],
 ];
 
 const someday = [
   ["Selector Lab", "Turn a saved Janitor page into a less-annoying map of useful CSS targets."],
   ["Media Checker", "Check Ella and public image URLs before they become a tiny broken icon on your profile."],
-  ["Theme Vault", "Keep versions of the themes you swear you will remember to back up next time."],
+  ["Community Vault", "Share clean theme packs without copying anyone's profile or depending on mystery hashed selectors."],
 ];
 
 export default function JanitorHub() {
   return (
-    <main className="site-shell min-h-screen overflow-x-hidden bg-[#090d10] text-[#f7fbfc] selection:bg-[#b8f4ff] selection:text-[#07171a]">
+    <main id="main-content" className="site-shell min-h-screen overflow-x-hidden bg-[#090d10] text-[#f7fbfc] selection:bg-[#b8f4ff] selection:text-[#07171a]">
+      <a className="skip-link" href="#janitor-content">Skip to Janitor Tools</a>
       <div className="paper-noise pointer-events-none fixed inset-0 z-50" />
 
       <header className="relative z-20 px-4 pt-4 md:px-7">
@@ -34,7 +38,7 @@ export default function JanitorHub() {
         </div>
       </header>
 
-      <section className="relative px-5 pb-20 pt-20 md:px-8 md:pb-28 md:pt-28">
+      <section id="janitor-content" className="relative scroll-mt-6 px-5 pb-20 pt-20 md:px-8 md:pb-28 md:pt-28">
         <div className="blob blob-blue absolute -right-48 top-0 size-[700px] rounded-full" />
         <div className="relative mx-auto max-w-7xl">
           <div className="grid items-end gap-10 lg:grid-cols-[1.15fr_.55fr]">
@@ -62,8 +66,8 @@ export default function JanitorHub() {
             <div className="flex flex-col justify-center border-t border-white/10 bg-black/20 p-7 md:p-11 lg:border-l lg:border-t-0">
               <span className="w-fit rounded-full bg-[#b8f4ff] px-3 py-1.5 text-xs font-black text-[#07171a]">live right now</span>
               <h2 className="mt-5 text-4xl font-black tracking-[-.045em] text-white md:text-6xl">Profile Studio</h2>
-              <p className="mt-5 text-base leading-8 text-zinc-300">Import a saved Janitor page, edit against the real profile structure, and export the complete About Me source—CSS and HTML together, exactly where Janitor actually stores them.</p>
-              <div className="mt-7 flex flex-wrap gap-2">{["real page preview", "saved-page import", "element picker", "image library", "complete source export"].map(tag => <span key={tag} className="rounded-full border border-white/10 bg-white/[.04] px-3 py-2 text-xs font-bold text-zinc-400">{tag}</span>)}</div>
+              <p className="mt-5 text-base leading-8 text-zinc-300">Import a saved Janitor page or start clean, then grab, resize, recolour, animate, layer, undo, recover, and export one complete About Me source. It behaves like a design tool without pretending Janitor can run JavaScript.</p>
+              <div className="mt-7 flex flex-wrap gap-2">{["8-way resizing", "dual drag tools", "layer explorer", "13 presets", "autosave + recovery", "shortcut-heavy", "complete source export"].map(tag => <span key={tag} className="rounded-full border border-white/10 bg-white/[.04] px-3 py-2 text-xs font-bold text-zinc-400">{tag}</span>)}</div>
               <strong className="mt-9 text-sm text-[#b8f4ff]">open Profile Studio <span className="inline-block transition group-hover:translate-x-2">→</span></strong>
             </div>
           </Link>

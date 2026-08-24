@@ -1,5 +1,6 @@
 import type { LobbyPlayerState, SessionMode, SessionPhase } from "../game/types";
 import { useState } from "react";
+import Link from "next/link";
 
 type Props = {
   phase: SessionPhase;
@@ -97,9 +98,14 @@ export default function MultiplayerLobby({
   return (
     <div
       className="absolute inset-0 z-[210] flex items-center justify-center"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="sans-lobby-title"
       style={{
         background:
           "radial-gradient(circle at top, rgba(42,76,130,0.35), rgba(0,0,0,0.98) 46%), #000",
+        overflowY: "auto",
+        padding: "max(20px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left))",
       }}
     >
       <div
@@ -109,6 +115,8 @@ export default function MultiplayerLobby({
           background: "#000",
           padding: 28,
           boxShadow: "0 0 0 6px #000, 0 0 0 10px #fff",
+          maxHeight: "calc(100svh - 40px)",
+          overflowY: "auto",
         }}
       >
         <div style={{ display: "flex", justifyContent: "space-between", gap: 12, marginBottom: 22 }}>
@@ -116,30 +124,18 @@ export default function MultiplayerLobby({
             <div style={{ color: "#7dd3fc", fontSize: 12, letterSpacing: "0.28em", marginBottom: 8 }}>
               SANS SIMULATOR
             </div>
-            <h1 style={{ color: "#fff", fontSize: 28, margin: 0 }}>{inLobby ? "MULTIPLAYER LOBBY" : "MODE SELECT"}</h1>
+            <h1 id="sans-lobby-title" style={{ color: "#fff", fontSize: 28, margin: 0 }}>{inLobby ? "MULTIPLAYER LOBBY" : "MODE SELECT"}</h1>
           </div>
-          {mode !== "solo" && (
-            <button
-              onClick={onLeave}
-              style={{
-                border: "2px solid #fff",
-                background: "#000",
-                color: "#fff",
-                padding: "10px 14px",
-                cursor: "pointer",
-              }}
-            >
-              LEAVE
-            </button>
-          )}
+          <div style={{display:"flex",gap:8,alignItems:"flex-start"}}><Link href="/" style={{border:"2px solid #fff",background:"#000",color:"#fff",padding:"10px 14px",textDecoration:"none"}}>PATCHIES</Link>{mode !== "solo" && <button onClick={onLeave} style={{border:"2px solid #fff",background:"#000",color:"#fff",padding:"10px 14px",cursor:"pointer"}}>LEAVE</button>}</div>
         </div>
 
         {!inLobby && (
           <div style={{ display: "grid", gap: 16 }}>
             <div style={{ border: "3px solid #fff", padding: 16 }}>
-              <div style={{ color: "#aaa", fontSize: 11, marginBottom: 10 }}>YOUR NAME</div>
+              <label htmlFor="solo-player-name" style={{ display:"block", color: "#aaa", fontSize: 11, marginBottom: 10 }}>YOUR NAME</label>
               <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
                 <input
+                  id="solo-player-name"
                   value={nameDraft}
                   onChange={(event) => setNameDraft(event.target.value)}
                   maxLength={18}
@@ -151,7 +147,6 @@ export default function MultiplayerLobby({
                     background: "#000",
                     color: "#fff",
                     padding: "12px 14px",
-                    outline: "none",
                   }}
                 />
                 <button
@@ -175,9 +170,10 @@ export default function MultiplayerLobby({
               HOST CO-OP
             </button>
             <div style={{ border: "3px solid #fff", padding: 16 }}>
-              <div style={{ color: "#aaa", fontSize: 11, marginBottom: 10 }}>JOIN HOST</div>
+              <label htmlFor="join-host-code" style={{ display:"block", color: "#aaa", fontSize: 11, marginBottom: 10 }}>JOIN HOST</label>
               <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
                 <input
+                  id="join-host-code"
                   value={joinCode ?? ""}
                   onChange={(event) => onJoinCodeChange(event.target.value)}
                   placeholder="Enter host code"
@@ -188,7 +184,6 @@ export default function MultiplayerLobby({
                     background: "#000",
                     color: "#fff",
                     padding: "12px 14px",
-                    outline: "none",
                   }}
                 />
                 <button
@@ -205,9 +200,10 @@ export default function MultiplayerLobby({
         {inLobby && (
           <div style={{ display: "grid", gap: 18 }}>
             <div style={{ border: "3px solid #fff", padding: 16 }}>
-              <div style={{ color: "#aaa", fontSize: 11, marginBottom: 10 }}>YOUR NAME</div>
+              <label htmlFor="lobby-player-name" style={{ display:"block", color: "#aaa", fontSize: 11, marginBottom: 10 }}>YOUR NAME</label>
               <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
                 <input
+                  id="lobby-player-name"
                   value={nameDraft}
                   onChange={(event) => setNameDraft(event.target.value)}
                   maxLength={18}
@@ -219,7 +215,6 @@ export default function MultiplayerLobby({
                     background: "#000",
                     color: "#fff",
                     padding: "12px 14px",
-                    outline: "none",
                   }}
                 />
                 <button
@@ -261,7 +256,7 @@ export default function MultiplayerLobby({
               <div style={{ color: "#fff", fontSize: 24, letterSpacing: "0.16em", wordBreak: "break-all" }}>
                 {hostCode || "LOADING..."}
               </div>
-              <div style={{ color: "#7dd3fc", fontSize: 10, marginTop: 8 }}>{connectionStatus}</div>
+              <div aria-live="polite" style={{ color: "#7dd3fc", fontSize: 10, marginTop: 8 }}>{connectionStatus}</div>
               <div style={{ color: "#888", fontSize: 10, marginTop: 6 }}>
                 * authoritative host at 60 tick / 20 snapshot, with local prediction enabled.
               </div>
@@ -297,7 +292,7 @@ export default function MultiplayerLobby({
           </div>
         )}
 
-        {lastError && <div style={{ color: "#f87171", marginTop: 16, fontSize: 10 }}>{lastError}</div>}
+        {lastError && <div role="alert" style={{ color: "#f87171", marginTop: 16, fontSize: 10 }}>{lastError}</div>}
       </div>
     </div>
   );

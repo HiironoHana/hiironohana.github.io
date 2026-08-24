@@ -7,7 +7,7 @@ import GameOverScreen from "./components/GameOverScreen";
 import Hud from "./components/Hud";
 import MultiplayerLobby from "./components/MultiplayerLobby";
 import { MAX_HP, pixelFont } from "./game/constants";
-import { clampToGame, detectTouchControls, getGameScale, getUiScale, pointHitsSans, withBasePath } from "./game/utils";
+import { BASE_HEIGHT, BASE_WIDTH, clampToGame, detectTouchControls, getGameScale, getUiScale, mapGamePosition, pointHitsSans, withBasePath } from "./game/utils";
 import { useSansSimulator } from "./useSansSimulator";
 
 export default function SansSimulatorPage() {
@@ -17,7 +17,16 @@ export default function SansSimulatorPage() {
   const touchPointerIdRef = useRef<number | null>(null);
   const gameScale = useMemo(() => getGameScale(dims), [dims]);
   const uiScale = useMemo(() => getUiScale(gameScale), [gameScale]);
-  const beamLength = Math.max(dims.width || 1920, dims.height || 1080) * 3;
+  const worldDims = useMemo(
+    () => simulator.worldDims.width && simulator.worldDims.height
+      ? simulator.worldDims
+      : { width: dims.width || BASE_WIDTH, height: dims.height || BASE_HEIGHT },
+    [dims.height, dims.width, simulator.worldDims],
+  );
+  const worldGameScale = useMemo(() => getGameScale(worldDims), [worldDims]);
+  const viewScaleX = (dims.width || worldDims.width) / worldDims.width;
+  const viewScaleY = (dims.height || worldDims.height) / worldDims.height;
+  const beamLength = Math.max(worldDims.width, worldDims.height) * 3;
   const cursorSize = Math.max(24, 28 * gameScale);
   const touchButtonSize = Math.max(88, 120 * uiScale);
   const touchInset = Math.max(16, 18 * uiScale);
@@ -27,14 +36,6 @@ export default function SansSimulatorPage() {
     },
     [dims, setPointer],
   );
-
-  useEffect(() => {
-    const pos = {
-      x: dims.width / 2 || 0,
-      y: dims.height / 2 || 0,
-    };
-    setClampedPointer(pos);
-  }, [dims.height, dims.width, setClampedPointer]);
 
   useEffect(() => {
     const media = window.matchMedia("(hover: none) and (pointer: coarse)");
@@ -56,11 +57,12 @@ export default function SansSimulatorPage() {
   const remotePlayers = simulator.remotePlayers;
   const showBattle = simulator.phase === "battle";
   const localDead = showBattle && localPlayer ? !localPlayer.alive : false;
-  const localPointer = localPlayer?.pos ?? { x: dims.width / 2 || 0, y: dims.height / 2 || 0 };
+  const localPointer = localPlayer?.pos ?? { x: worldDims.width / 2, y: worldDims.height / 2 };
+  const localPointerViewport = mapGamePosition(localPointer, worldDims, dims);
   const canTouchAttack =
     showBattle &&
     !!localPlayer?.alive &&
-    simulator.renderSans.some((sans) => pointHitsSans(localPointer, sans, gameScale));
+    simulator.renderSans.some((sans) => pointHitsSans(localPointer, sans, worldGameScale));
 
   return (
     <>
@@ -68,8 +70,6 @@ export default function SansSimulatorPage() {
       <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-
         @keyframes utFadeIn {
           0% { opacity: 0; }
           66% { opacity: 0; }
@@ -165,7 +165,18 @@ export default function SansSimulatorPage() {
           />
         )}
 
-        <div className="relative h-full w-full">
+        <div
+          style={{
+            position: "absolute",
+            left: 0,
+            top: 0,
+            width: worldDims.width,
+            height: worldDims.height,
+            transform: `scale(${viewScaleX}, ${viewScaleY})`,
+            transformOrigin: "left top",
+            pointerEvents: "none",
+          }}
+        >
           {showBattle &&
             simulator.renderBlasters.map((blaster) => {
               if (blaster.state !== "charge") return null;
@@ -182,9 +193,9 @@ export default function SansSimulatorPage() {
                     left: blaster.pos.x,
                     top: blaster.pos.y,
                     width: beamLength,
-                    height: beamHeight * gameScale,
+                    height: beamHeight * worldGameScale,
                     background: "rgba(110, 210, 255, 0.9)",
-                    boxShadow: `0 0 0 ${(1 + progress * 3) * gameScale}px rgba(130, 220, 255, ${0.35 + progress * 0.25})`,
+                    boxShadow: `0 0 0 ${(1 + progress * 3) * worldGameScale}px rgba(130, 220, 255, ${0.35 + progress * 0.25})`,
                     transform: `translate(0, -50%) rotate(${blaster.angle}rad)`,
                     transformOrigin: "left center",
                     opacity: 0.18 + progress * 0.5,
@@ -206,15 +217,15 @@ export default function SansSimulatorPage() {
                     left: blaster.pos.x,
                     top: blaster.pos.y,
                     width: beamLength,
-                    height: 90 * blaster.scale * gameScale,
+                    height: 90 * blaster.scale * worldGameScale,
                     background: "#fff",
                     boxShadow: `
-                      0 ${8 * blaster.scale * gameScale}px 0 0 rgba(255,255,255,0.6),
-                      0 -${8 * blaster.scale * gameScale}px 0 0 rgba(255,255,255,0.6),
-                      0 ${16 * blaster.scale * gameScale}px 0 0 rgba(180,230,255,0.35),
-                      0 -${16 * blaster.scale * gameScale}px 0 0 rgba(180,230,255,0.35),
-                      0 ${28 * blaster.scale * gameScale}px 0 0 rgba(100,200,255,0.15),
-                      0 -${28 * blaster.scale * gameScale}px 0 0 rgba(100,200,255,0.15)
+                      0 ${8 * blaster.scale * worldGameScale}px 0 0 rgba(255,255,255,0.6),
+                      0 -${8 * blaster.scale * worldGameScale}px 0 0 rgba(255,255,255,0.6),
+                      0 ${16 * blaster.scale * worldGameScale}px 0 0 rgba(180,230,255,0.35),
+                      0 -${16 * blaster.scale * worldGameScale}px 0 0 rgba(180,230,255,0.35),
+                      0 ${28 * blaster.scale * worldGameScale}px 0 0 rgba(100,200,255,0.15),
+                      0 -${28 * blaster.scale * worldGameScale}px 0 0 rgba(100,200,255,0.15)
                     `,
                     transform: `translate(0, -50%) rotate(${blaster.angle}rad)`,
                     transformOrigin: "left center",
@@ -236,7 +247,7 @@ export default function SansSimulatorPage() {
                   position: "absolute",
                   left: bone.pos.x,
                   top: bone.pos.y,
-                  width: bone.size * (4 / 3) * gameScale,
+                  width: bone.size * (4 / 3) * worldGameScale,
                   pointerEvents: "none",
                   transform: `translate(-50%, -50%) rotate(${
                     (Math.atan2(bone.vel.y, bone.vel.x) * 180) / Math.PI + 90
@@ -259,7 +270,7 @@ export default function SansSimulatorPage() {
                   position: "absolute",
                   left: blaster.pos.x,
                   top: blaster.pos.y,
-                  width: 140 * blaster.scale * gameScale,
+                  width: 140 * blaster.scale * worldGameScale,
                   zIndex: 20,
                   pointerEvents: "none",
                   filter:
@@ -279,8 +290,8 @@ export default function SansSimulatorPage() {
                   position: "absolute",
                   left: sans.pos.x,
                   top: sans.pos.y,
-                  width: sans.size * gameScale,
-                  height: sans.size * gameScale,
+                  width: sans.size * worldGameScale,
+                  height: sans.size * worldGameScale,
                   transform: "translate(-50%, -50%)",
                   zIndex: 30,
                 }}
@@ -293,7 +304,7 @@ export default function SansSimulatorPage() {
                       top: "50%",
                       width: "130%",
                       height: "130%",
-                      border: `${Math.max(1, 2 * gameScale)}px solid #fff`,
+                      border: `${Math.max(1, 2 * worldGameScale)}px solid #fff`,
                       pointerEvents: "none",
                       animation: "pixelPing 0.5s steps(3) infinite",
                     }}
@@ -320,6 +331,7 @@ export default function SansSimulatorPage() {
             const isLocal = player.id === simulator.localPlayerId;
             const isGuestRemoteTint = simulator.mode === "client" && !isLocal;
             const isDead = !player.alive;
+            const viewportPos = mapGamePosition(player.pos, worldDims, dims);
             return (
               <img
                 key={player.id}
@@ -327,8 +339,8 @@ export default function SansSimulatorPage() {
                 alt=""
                 style={{
                   position: "fixed",
-                  left: player.pos.x,
-                  top: player.pos.y,
+                  left: viewportPos.x,
+                  top: viewportPos.y,
                   width: cursorSize,
                   pointerEvents: "none",
                   zIndex: isLocal ? 110 : 100,
@@ -421,7 +433,7 @@ export default function SansSimulatorPage() {
               onPointerDown={(event) => {
                 event.preventDefault();
                 event.stopPropagation();
-                simulator.handlePointerAttack(localPointer);
+                simulator.handlePointerAttack(localPointerViewport);
               }}
               onPointerUp={(event) => {
                 event.stopPropagation();

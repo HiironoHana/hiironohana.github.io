@@ -35,7 +35,7 @@ import type {
 } from "./game/types";
 import { PLAYER_IDS } from "./game/types";
 import { useAudio } from "./game/useAudio";
-import { clamp, distToLine, getGameScale, hypot, makeSans, pointHitsSans, rand } from "./game/utils";
+import { BASE_HEIGHT, BASE_WIDTH, clamp, distToLine, getGameScale, hypot, makeSans, mapGamePosition, pointHitsSans, rand } from "./game/utils";
 
 type MutableState = {
   sans: SansFace[];
@@ -109,6 +109,46 @@ function createInitialMutableState(): MutableState {
   };
 }
 
+function isGameDims(value: GameDims | undefined): value is GameDims {
+  return Boolean(value && Number.isFinite(value.width) && value.width > 0 && Number.isFinite(value.height) && value.height > 0);
+}
+
+function scaleWorldPoint(pos: Vec2, from: GameDims, to: GameDims): Vec2 {
+  return {
+    x: pos.x * (to.width / from.width),
+    y: pos.y * (to.height / from.height),
+  };
+}
+
+function scaleWorldAngle(angle: number, scaleX: number, scaleY: number) {
+  return Math.atan2(Math.sin(angle) * scaleY, Math.cos(angle) * scaleX);
+}
+
+function resizeMultiplayerWorld(state: MutableState, from: GameDims, to: GameDims) {
+  if (!isGameDims(from) || !isGameDims(to) || (from.width === to.width && from.height === to.height)) return;
+  const scaleX = to.width / from.width;
+  const scaleY = to.height / from.height;
+
+  for (const id of PLAYER_IDS) {
+    state.players[id].pos = scaleWorldPoint(state.players[id].pos, from, to);
+  }
+  state.sans = state.sans.map((sans) => ({
+    ...sans,
+    pos: scaleWorldPoint(sans.pos, from, to),
+    vel: { x: sans.vel.x * scaleX, y: sans.vel.y * scaleY },
+  }));
+  state.bones = state.bones.map((bone) => ({
+    ...bone,
+    pos: scaleWorldPoint(bone.pos, from, to),
+    vel: { x: bone.vel.x * scaleX, y: bone.vel.y * scaleY },
+  }));
+  state.blasters = state.blasters.map((blaster) => ({
+    ...blaster,
+    pos: scaleWorldPoint(blaster.pos, from, to),
+    angle: scaleWorldAngle(blaster.angle, scaleX, scaleY),
+  }));
+}
+
 function clonePlayers(players: Record<PlayerId, PlayerCombatState>) {
   return PLAYER_IDS.reduce(
     (acc, id) => {
@@ -157,6 +197,8 @@ export function useSansSimulator() {
 
   const [dims, setDims] = useState<GameDims>({ width: 0, height: 0 });
   const dimsRef = useRef<GameDims>({ width: 0, height: 0 });
+  const [remoteWorldDims, setRemoteWorldDims] = useState<GameDims>({ width: BASE_WIDTH, height: BASE_HEIGHT });
+  const remoteWorldDimsRef = useRef<GameDims>({ width: BASE_WIDTH, height: BASE_HEIGHT });
 
   const [phase, setPhase] = useState<SessionPhase>("menu");
   const phaseRef = useRef<SessionPhase>("menu");
@@ -188,6 +230,7 @@ export function useSansSimulator() {
 
   const stateRef = useRef<MutableState>(createInitialMutableState());
   const pointerRef = useRef<Vec2>({ x: 0, y: 0 });
+  const dimensionsInitializedRef = useRef(false);
   const clickLockRef = useRef(false);
   const boneIdRef = useRef(1);
   const blasterIdRef = useRef(1);
@@ -196,6 +239,24 @@ export function useSansSimulator() {
   const clientConnRef = useRef<PeerConnectionLike | null>(null);
   const hostConnectionsRef = useRef<Partial<Record<PlayerId, PeerConnectionLike>>>({});
   const connectionOwnersRef = useRef(new Map<PeerConnectionLike, PlayerId>());
+
+  const acceptRemoteWorldDims = useCallback((next: GameDims | undefined) => {
+    if (!isGameDims(next)) return;
+    const previous = remoteWorldDimsRef.current;
+    if (previous.width === next.width && previous.height === next.height) return;
+    if (modeRef.current === "client" && isGameDims(previous)) {
+      pointerRef.current = mapGamePosition(pointerRef.current, previous, next);
+      stateRef.current.players[localPlayerIdRef.current].pos = { ...pointerRef.current };
+    }
+    remoteWorldDimsRef.current = { ...next };
+    setRemoteWorldDims({ ...next });
+  }, []);
+
+  const viewportToWorld = useCallback((pos: Vec2) => {
+    const viewport = dimsRef.current;
+    const world = modeRef.current === "client" ? remoteWorldDimsRef.current : viewport;
+    return mapGamePosition(pos, viewport, world);
+  }, []);
 
   const setLocalIdentity = useCallback((id: PlayerId) => {
     localPlayerIdRef.current = id;
@@ -416,6 +477,7 @@ export function useSansSimulator() {
     if (modeRef.current !== "host" || phaseRef.current !== "battle") return;
     const state = stateRef.current;
     const payload: SnapshotPayload = {
+      worldDims: { ...dimsRef.current },
       sans: state.sans,
       bones: state.bones,
       blasters: state.blasters,
@@ -454,6 +516,7 @@ export function useSansSimulator() {
         setLocalIdentity(payload.playerId);
         setMode("client");
         modeRef.current = "client";
+        acceptRemoteWorldDims(payload.worldDims);
         applyLobbyPlayers(payload.players);
         phaseRef.current = "lobby";
         setPhase("lobby");
@@ -470,6 +533,7 @@ export function useSansSimulator() {
 
       if (message.type === "snapshot") {
         const payload = message.payload;
+        acceptRemoteWorldDims(payload.worldDims);
         stateRef.current.players = clonePlayers(payload.players);
         stateRef.current.sans = payload.sans;
         stateRef.current.bones = payload.bones;
@@ -497,7 +561,7 @@ export function useSansSimulator() {
         setLastError(message.message);
       }
     },
-    [applyLobbyPlayers, commitRender, setLocalIdentity],
+    [acceptRemoteWorldDims, applyLobbyPlayers, commitRender, setLocalIdentity],
   );
 
   const disconnectOwnedPlayer = useCallback((connection: PeerConnectionLike) => {
@@ -544,6 +608,7 @@ export function useSansSimulator() {
           payload: {
             playerId: freeId,
             hostCode,
+            worldDims: { ...dimsRef.current },
             players: clonePlayers(stateRef.current.players),
           },
         } satisfies NetworkMessage);
@@ -611,6 +676,9 @@ export function useSansSimulator() {
 
   const leaveSession = useCallback(() => {
     destroyPeer();
+    if (modeRef.current === "client" && isGameDims(dimsRef.current)) {
+      pointerRef.current = mapGamePosition(pointerRef.current, remoteWorldDimsRef.current, dimsRef.current);
+    }
     modeRef.current = "solo";
     setMode("solo");
     setLocalIdentity("host");
@@ -679,6 +747,10 @@ export function useSansSimulator() {
       const Peer = await loadPeerJs();
       const peer = new Peer();
       peerRef.current = peer;
+      if (isGameDims(dimsRef.current)) {
+        remoteWorldDimsRef.current = { ...dimsRef.current };
+        setRemoteWorldDims({ ...dimsRef.current });
+      }
       modeRef.current = "client";
       setMode("client");
       setConnectionStatus("Connecting to host...");
@@ -737,13 +809,14 @@ export function useSansSimulator() {
   const handlePointerAttack = useCallback(
     (pointer: Vec2) => {
       if (phaseRef.current !== "battle") return;
+      const worldPointer = viewportToWorld(pointer);
       if (modeRef.current === "client") {
-        clientConnRef.current?.send({ type: "pointer-attack", pos: pointer } satisfies NetworkMessage);
+        clientConnRef.current?.send({ type: "pointer-attack", pos: worldPointer } satisfies NetworkMessage);
         return;
       }
-      processHitAtPointer(pointer);
+      processHitAtPointer(worldPointer);
     },
-    [processHitAtPointer],
+    [processHitAtPointer, viewportToWorld],
   );
 
   const updatePlayerName = useCallback(
@@ -764,31 +837,47 @@ export function useSansSimulator() {
 
   const setPointer = useCallback(
     (pos: Vec2) => {
-      pointerRef.current = pos;
-      stateRef.current.players[localPlayerIdRef.current].pos = pos;
+      const worldPos = viewportToWorld(pos);
+      pointerRef.current = worldPos;
+      stateRef.current.players[localPlayerIdRef.current].pos = worldPos;
       if (phaseRef.current === "battle") {
         commitRender();
       }
     },
-    [commitRender],
+    [commitRender, viewportToWorld],
   );
 
   useEffect(() => {
     const onResize = () => {
       const next = { width: window.innerWidth, height: window.innerHeight };
+      const previous = dimsRef.current;
+      if (modeRef.current === "host" && isGameDims(previous)) {
+        resizeMultiplayerWorld(stateRef.current, previous, next);
+        pointerRef.current = scaleWorldPoint(pointerRef.current, previous, next);
+        stateRef.current.players[localPlayerIdRef.current].pos = { ...pointerRef.current };
+        commitRender();
+      }
       dimsRef.current = next;
       setDims(next);
     };
     onResize();
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
-  }, []);
+  }, [commitRender]);
 
   useEffect(() => {
     if (!dims.width) return;
-    const center = { x: dims.width / 2, y: dims.height / 2 };
-    pointerRef.current = center;
-    stateRef.current.players[localPlayerIdRef.current].pos = center;
+    const world = modeRef.current === "client"
+      ? remoteWorldDimsRef.current
+      : { width: dims.width, height: dims.height };
+    const center = { x: world.width / 2, y: world.height / 2 };
+    const current = pointerRef.current;
+    const next = dimensionsInitializedRef.current
+      ? mapGamePosition(current, world, world)
+      : center;
+    dimensionsInitializedRef.current = true;
+    pointerRef.current = next;
+    stateRef.current.players[localPlayerIdRef.current].pos = next;
     commitRender();
   }, [commitRender, dims.height, dims.width]);
 
@@ -1073,9 +1162,11 @@ export function useSansSimulator() {
     [localPlayerId, renderPlayers],
   );
   const canReady = mode !== "solo" && (mode !== "host" || !!hostCode);
+  const worldDims = mode === "client" ? remoteWorldDims : dims;
 
   return {
     dims,
+    worldDims,
     phase,
     mode,
     renderSans,

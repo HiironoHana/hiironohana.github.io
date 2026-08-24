@@ -29,6 +29,33 @@ html {
   scroll-behavior: smooth;
 }
 
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid #b8f4ff;
+  outline-offset: 3px;
+}
+
+.skip-link {
+  position: fixed;
+  z-index: 1000;
+  left: 1rem;
+  top: 1rem;
+  transform: translateY(-160%);
+  border-radius: 999px;
+  background: #fff;
+  color: #111;
+  padding: .7rem 1rem;
+  font-weight: 900;
+  transition: transform .15s ease;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
 .site-shell {
   background-image:
     linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
@@ -79,6 +106,19 @@ html {
   z-index: -1;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 2rem;
+}
+
+@keyframes homepage-reveal {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.homepage-reveal {
+  animation: homepage-reveal .6s ease both;
+}
+
+.homepage-reveal-delay {
+  animation-delay: .08s;
 }
 
 @media (prefers-reduced-motion: reduce) {
